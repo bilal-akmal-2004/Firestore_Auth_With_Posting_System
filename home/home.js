@@ -21,9 +21,7 @@ const firebaseConfig = {
 
 // ✅ Redirect if user is not logged in
 let userData = JSON.parse(localStorage.getItem("userData"));
-if (!userData) {
-  window.location.replace("../../signIn/signIn.html");
-}
+if (!userData) window.location.replace("../../signIn/signIn.html");
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
@@ -60,32 +58,32 @@ if (userData) {
 
   try {
     showLoadingSpinner();
-    // Fetch additional user data from Firestore
-    const userRef = doc(db, "Users", userData.id);
-    const userSnap = await getDoc(userRef);
+    // // Fetch additional user data from Firestore
+    // const userRef = doc(db, "Users", userData.id);
+    // const userSnap = await getDoc(userRef);
 
-    if (userSnap.exists()) {
-      const userFromDb = userSnap.data();
+    // if (userSnap.exists()) {
+    //   const userFromDb = userSnap.data();
 
-      if (userFromDb.section === undefined) {
-        message.innerText = `Welcome !
+    if (userData.section === undefined) {
+      message.innerText = `Welcome !
           Name: ${userData.userName}
           Email: ${userData.email}
           Id: ${userData.id}
           `;
-      } else {
-        message.innerText = `Welcome !
-          Name: ${userData.userName}
-          Email: ${userData.email}
-          Id: ${userData.id}
-          Section: ${userFromDb.section}
-          Gender: ${userFromDb.gender}
-          `;
-      }
     } else {
-      console.log("No user data found in Firestore for UID:", userData.id);
-      window.location.replace("../signIn/signIn.html");
+      message.innerText = `Welcome !
+          Name: ${userData.userName}
+          Email: ${userData.email}
+          Id: ${userData.id}
+          Section: ${userData.section}
+          Gender: ${userData.gender}
+          `;
     }
+    // } else {
+    //   console.log("No user data found in Firestore for UID:", userData.id);
+    //   window.location.replace("../signIn/signIn.html");
+    // }
   } catch (error) {
     console.error("Error fetching user data from Firestore:", error);
     showModal(

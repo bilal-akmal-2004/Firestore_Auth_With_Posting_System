@@ -17,6 +17,10 @@ const firebaseConfig = {
   appId: "1:712556880799:web:c9ae8ce0632ae17b68d3aa",
 };
 
+// ✅ Redirect if user is not logged in
+let userData = JSON.parse(localStorage.getItem("userData"));
+if (!userData) window.location.replace("../../signIn/signIn.html");
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let emailInp = document.querySelector("#emailInp");
@@ -94,9 +98,3 @@ const getUser = async () => {
 let searchButton = document.querySelector("#searchButton");
 
 searchButton.addEventListener("click", getUser);
-
-// ✅ Redirect if user is not logged in
-let userData = JSON.parse(localStorage.getItem("userData"));
-if (!userData) {
-  window.location.replace("../../signIn/signIn.html");
-}

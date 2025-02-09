@@ -8,11 +8,12 @@ import {
   query,
   where,
   deleteDoc,
+  onSnapshot,
   doc,
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
-// ✅ Initialize Firebase
+//  Initialize Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDfgK34boUe0T77KFpteYvMRCYJ-aXOjqc",
   authDomain: "verysimpleuserform.firebaseapp.com",
@@ -24,11 +25,14 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-// ✅ Redirect if user is not logged in
+//  Redirect if user is not logged in
 let userData = JSON.parse(localStorage.getItem("userData"));
 if (!userData) {
   window.location.replace("../../signIn/signIn.html");
 }
+
+// this for saving all posts only one time
+let savedPosts = [];
 
 // this for creaitng spinner for spingg loading css
 let loadingSpinner = document.getElementById("loading-spinner");
@@ -95,29 +99,48 @@ createNewPostButton.addEventListener("click", createNewPost);
 
 // for showing all of my post here is the functuons for that
 
-// ✅ Show My Posts
-let showMyPosts = async () => {
+//  Show My Posts
+//
+let mySavedPosts = [];
+
+// Firestore real-time listener for My Posts
+const q = query(collection(db, "posts"), where("id", "==", userData.id));
+
+onSnapshot(q, (querySnapshot) => {
+  mySavedPosts = []; // Clear old cache before updating
+
+  querySnapshot.forEach((post) => {
+    const postData = post.data();
+    mySavedPosts.push({
+      postHeading: postData.postHeading,
+      postText: postData.postText,
+      postId: post.id, // Ensure correct ID is stored
+    });
+  });
+
+  console.log("Updated Posts:", mySavedPosts);
+  //  Update UI automatically when Firestore changes
+  showMyPosts();
+});
+
+// Function to display My Posts from cache
+let showMyPosts = () => {
   try {
     showLoadingSpinner();
-    const q = query(collection(db, "posts"), where("id", "==", userData.id));
     myPostsDiv.innerHTML = `<h1 style="font-size: 65px; text-decoration: underline;">My Posts</h1>`;
 
-    const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((post) => {
-      const postData = post.data();
-      const postId = post.id;
-
+    mySavedPosts.forEach((post) => {
       myPostsDiv.innerHTML += `
         <div class="post-item">
-          <h2>${postData.postHeading}</h2>
-          <p>${postData.postText}</p>
-          <button class="btn btn-danger delete-btn" data-id="${postId}">Delete</button>
-          <button class="btn btn-warning edit-btn" data-id="${postId}" data-heading="${postData.postHeading}" data-text="${postData.postText}">Edit</button>
+          <h2>${post.postHeading}</h2>
+          <p>${post.postText}</p>
+          <button class="btn btn-danger delete-btn" data-id="${post.postId}">Delete</button>
+          <button class="btn btn-warning edit-btn" data-id="${post.postId}" data-heading="${post.postHeading}" data-text="${post.postText}">Edit</button>
         </div>
       `;
     });
 
-    // ✅ Attach event listeners to Delete and Edit buttons
+    // Attach event listeners to Delete and Edit buttons
     document.querySelectorAll(".delete-btn").forEach((button) => {
       button.addEventListener("click", async (event) => {
         let postId = event.target.getAttribute("data-id");
@@ -140,13 +163,12 @@ let showMyPosts = async () => {
   }
 };
 
-// ✅ Delete Post
+// Delete Post (No need to manually refresh UI)
 let deletePost = async (postId) => {
   try {
     showLoadingSpinner();
     await deleteDoc(doc(db, "posts", postId));
     showModal("Success in deletion");
-    showMyPosts(); // Refresh the posts list
   } catch (error) {
     console.error("Error deleting post:", error);
   } finally {
@@ -154,7 +176,7 @@ let deletePost = async (postId) => {
   }
 };
 
-// ✅ Open Edit Modal
+// Open Edit Modal
 let openEditModal = (postId, postHeading, postText) => {
   document.getElementById("editPostHeading").value = postHeading;
   document.getElementById("editPostText").value = postText;
@@ -162,12 +184,12 @@ let openEditModal = (postId, postHeading, postText) => {
   document.getElementById("editModal").style.display = "flex";
 };
 
-// ✅ Close Edit Modal
+// Close Edit Modal
 window.closeEditModal = () => {
   document.getElementById("editModal").style.display = "none";
 };
 
-// ✅ Update Post
+// Update Post (No need to manually refresh UI)
 let updatePost = async () => {
   try {
     showLoadingSpinner();
@@ -184,7 +206,6 @@ let updatePost = async () => {
 
     showModal("Post updated successfully!");
     closeEditModal();
-    showMyPosts(); // Refresh the posts list
   } catch (error) {
     console.error("Error updating post:", error);
   } finally {
@@ -192,44 +213,74 @@ let updatePost = async () => {
   }
 };
 
-// ✅ Attach event listener to My Posts button
-myPostButton.addEventListener("click", () => {
-  mainFormCreateUser.style.display = "none";
-  allPostsDiv.style.display = "none";
-  myPostsDiv.style.display = "block";
-  showMyPosts();
-});
+// Attach event listener to My Posts button
+if (myPostButton) {
+  myPostButton.addEventListener("click", () => {
+    mainFormCreateUser.style.display = "none";
+    allPostsDiv.style.display = "none";
+    myPostsDiv.style.display = "block";
+    showMyPosts();
+  });
+}
 
-// ✅ Attach event listener to Update button inside modal
+// Attach event listener to Update button inside modal
 document
   .getElementById("updatePostButton")
   .addEventListener("click", updatePost);
+
 // for showing all of my post here is the functuons for that ends above -------------------------
 
 //now this is for the getiing all the post fucantion below
+//  Listen for Real-Time Updates
+onSnapshot(collection(db, "posts"), (snapshot) => {
+  savedPosts = snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+  console.log("Cached Posts Updated:", savedPosts);
+});
+
+//  Function to Display Posts
+const displayPosts = () => {
+  let counterPost = 0;
+  allPostsDiv.innerHTML = `<h1 style="font-size: 65px; 
+    text-decoration: underline;
+    text-transform: uppercase;">All Posts</h1>`;
+
+  savedPosts.forEach((post) => {
+    counterPost++;
+    allPostsDiv.innerHTML += `<h1>${counterPost}: ${post.postHeading}</h1>
+      <h3>${post.postText}</h3>`;
+  });
+};
+
+//  Function to Get All Posts (Uses Cache First)
 let getAllPosts = async () => {
   try {
     showLoadingSpinner();
-    const posts = await getDocs(collection(db, "posts"));
-    let counterPost = 0;
-    allPostsDiv.innerHTML = `<h1 style="font-size: 65px; 
-      text-decoration: underline;
-      
-      text-transform: uppercase;">All Posts</h1>`;
-    posts.forEach((post) => {
-      counterPost++;
-      console.log(post.data());
-      allPostsDiv.innerHTML += `<h1>${counterPost}: ${
-        post.data().postHeading
-      }</h1>
-      <h3>${post.data().postText}</h3>`;
-    });
+
+    if (savedPosts.length > 0) {
+      console.log("Using cached posts...");
+      displayPosts();
+    } else {
+      console.log("Fetching posts from Firestore...");
+      const posts = await getDocs(collection(db, "posts"));
+
+      savedPosts = posts.docs.map((post) => ({
+        id: post.id,
+        ...post.data(),
+      }));
+
+      displayPosts();
+    }
   } catch (error) {
     console.error(error);
   } finally {
     hideLoadingSpinner();
   }
 };
+
+//  Attach Event Listener to Button
 allPostButton.addEventListener("click", () => {
   myPostsDiv.style.display = "none";
   mainFormCreateUser.style.display = "none";

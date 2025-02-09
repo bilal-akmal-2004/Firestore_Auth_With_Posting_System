@@ -2,7 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebas
 import {
   getAuth,
   createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   signInWithPopup,
   GoogleAuthProvider,
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
@@ -25,9 +24,8 @@ const firebaseConfig = {
 };
 
 // ✅ Redirect if user is already logged in
-if (localStorage.getItem("userData")) {
+if (localStorage.getItem("userData"))
   window.location.replace("./home/home.html");
-}
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
