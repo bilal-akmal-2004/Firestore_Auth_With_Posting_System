@@ -31,6 +31,37 @@ if (!userData) {
   window.location.replace("../../signIn/signIn.html");
 }
 
+// this is for creating the time for our create new post area
+let getTime = () => {
+  let now = new Date();
+
+  // Get date components
+  let day = now.getDate();
+  let month = now.getMonth() + 1; // Months start from 0, so add 1
+  let year = now.getFullYear();
+
+  // Get time components
+  let hours = now.getHours();
+  let minutes = now.getMinutes();
+  let amPm = hours >= 12 ? "PM" : "AM";
+
+  // Convert to 12-hour format
+  hours = hours % 12 || 12; // Converts 0 to 12
+
+  // Ensure two-digit format for day, month, and minutes
+  day = day < 10 ? "0" + day : day;
+  month = month < 10 ? "0" + month : month;
+  minutes = minutes < 10 ? "0" + minutes : minutes;
+
+  // Format the final string
+  let formattedDate = `${day}/${month}/${year}`;
+  let formattedTime = `${hours}:${minutes} ${amPm}`;
+
+  console.log(`${formattedDate}, ${formattedTime}`);
+  // Example output: "11/02/2025, 2:18 PM"
+  return `${formattedDate}, ${formattedTime}`;
+};
+
 // this for saving all posts only one time
 let savedPosts = [];
 
@@ -77,12 +108,16 @@ newPostButton.addEventListener("click", () => {
   mainFormCreateUser.style.display = "block";
 });
 let createNewPost = async () => {
+  let currenttime = getTime();
+
   try {
     showLoadingSpinner();
     const docRef = await addDoc(collection(db, "posts"), {
       postHeading: postHeading.value,
       postText: postText.value,
       id: userData.id,
+      name: userData.userName,
+      createdTime: currenttime,
     });
     console.log("Document written with ID: ", docRef.id);
     postHeading.value = ``;
@@ -115,6 +150,7 @@ onSnapshot(q, (querySnapshot) => {
       postHeading: postData.postHeading,
       postText: postData.postText,
       postId: post.id, // Ensure correct ID is stored
+      createdTime: postData.createdTime,
     });
   });
 
@@ -134,8 +170,9 @@ let showMyPosts = () => {
         <div class="post-item">
           <h2>${post.postHeading}</h2>
           <p>${post.postText}</p>
-          <button class="btn btn-danger delete-btn" data-id="${post.postId}">Delete</button>
-          <button class="btn btn-warning edit-btn" data-id="${post.postId}" data-heading="${post.postHeading}" data-text="${post.postText}">Edit</button>
+          <h6>Created: ${post.createdTime}</h6>
+          <button class="btn btn-danger delete-btn w-25" data-id="${post.postId}">Delete</button>
+          <button class="btn btn-warning edit-btn w-25" data-id="${post.postId}" data-heading="${post.postHeading}" data-text="${post.postText}">Edit</button>
         </div>
       `;
     });
@@ -243,14 +280,29 @@ onSnapshot(collection(db, "posts"), (snapshot) => {
 //  Function to Display Posts
 const displayPosts = () => {
   let counterPost = 0;
-  allPostsDiv.innerHTML = `<h1 style="font-size: 65px; 
+  allPostsDiv.innerHTML = `<h1 style="
+    color: skyblue;
+    font-size: 65px; 
     text-decoration: underline;
     text-transform: uppercase;">All Posts</h1>`;
 
   savedPosts.forEach((post) => {
     counterPost++;
-    allPostsDiv.innerHTML += `<h1>${counterPost}: ${post.postHeading}</h1>
-      <h3>${post.postText}</h3>`;
+    allPostsDiv.innerHTML += `
+    
+     <div style="display: flex; justify-content: center;">
+      <div style="    width: 50%;
+    border: 1px solid white;
+    border-radius: 6px;
+    border-bottom: 8px solid white;">
+       <div class="nameAndTime">
+      <h6>  <i class="fa-regular fa-user"></i> ${post.name}</h6>
+      <h6><i class="fa-regular fa-calendar"></i> ${post.createdTime}</h6>
+       </div>
+      <h1>${counterPost}: ${post.postHeading}</h1>
+      <h3>${post.postText}</h3></div>
+    </div>
+    `;
   });
 };
 
@@ -284,6 +336,6 @@ let getAllPosts = async () => {
 allPostButton.addEventListener("click", () => {
   myPostsDiv.style.display = "none";
   mainFormCreateUser.style.display = "none";
-  allPostsDiv.style.display = "block";
+  allPostsDiv.style.display = "flex";
   getAllPosts();
 });

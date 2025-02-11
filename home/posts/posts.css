@@ -149,3 +149,13 @@ label{
   margin: 5px;
 }
  /* Modal for edit Styling ends above*/
+
+ .nameAndTime{
+  display: flex;
+  justify-content: space-between;
+ }
+ #allPostsDiv{
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+ }
