@@ -294,8 +294,11 @@ const displayPosts = () => {
       <div style="    width: 50%;
     border: 1px solid white;
     border-radius: 6px;
-    border-bottom: 8px solid white;">
-       <div class="nameAndTime">
+    border-bottom: 8px solid white;
+    padding: 10px;
+    ">
+       <div class="nameAndTime""
+  >
       <h6>  <i class="fa-regular fa-user"></i> ${post.name}</h6>
       <h6><i class="fa-regular fa-calendar"></i> ${post.createdTime}</h6>
        </div>
