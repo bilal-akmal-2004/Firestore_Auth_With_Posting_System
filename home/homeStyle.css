@@ -103,7 +103,9 @@ h1{
 /* query here */
 @media (max-width: 522px) {
     #mainDiv{
-        padding: 5px;
+      padding: 5px;
+      width: 95%;
+      overflow: hidden;
     }
     h1{
         font-size: 25px;

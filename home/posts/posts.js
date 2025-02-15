@@ -291,12 +291,7 @@ const displayPosts = () => {
     allPostsDiv.innerHTML += `
     
      <div style="display: flex; justify-content: center;">
-      <div style="    width: 50%;
-    border: 1px solid white;
-    border-radius: 6px;
-    border-bottom: 8px solid white;
-    padding: 10px;
-    ">
+      <div class="postDiv">
        <div class="nameAndTime""
   >
       <h6>  <i class="fa-regular fa-user"></i> ${post.name}</h6>

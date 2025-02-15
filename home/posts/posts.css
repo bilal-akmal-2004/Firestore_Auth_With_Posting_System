@@ -164,3 +164,30 @@ label{
   flex-direction: column;
   gap: 14px;
  }
+
+ .postDiv{
+  width: 50%;
+  border: 1px solid white;
+  border-radius: 6px;
+  border-bottom: 8px solid white;
+  padding: 10px;
+ }
+
+ .navbarButtons{
+
+ }
+
+/* query her  */
+@media (max-width: 940px) {
+  .postDiv{
+      width: 70%;
+  }
+}
+@media (max-width: 417px) {
+  .postDiv{
+      width: 86%;
+  }
+  .navbarButtons{
+    font-size: 10px;
+  }
+}
