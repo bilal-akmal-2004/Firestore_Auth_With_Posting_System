@@ -65,7 +65,19 @@ label{
     border-radius: 50%;
     animation: spin 1s linear infinite;
   }
-  
+
+  .like-btn{
+    border-radius: 10px;
+    color: white;
+    background-color: #0a357ea3;
+  }
+  .likeButton-And-Likes{
+       display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-direction: row-reverse;
+    }
+    
   @keyframes spin {
     from {
       transform: rotate(0deg);

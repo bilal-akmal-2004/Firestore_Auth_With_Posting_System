@@ -135,7 +135,7 @@ async function signIn(event) {
         window.location.replace("../home/home.html");
       }
     } else {
-      console.log("No user data found in Firestore for UID:", uid);
+      showModal("No user data found in Firestore for UID:", uid);
     }
   } catch (error) {
     if (error.code === "auth/invalid-credential") {

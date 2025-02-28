@@ -15,13 +15,20 @@
   <body>
     <div id="mainDiv">
       <h1 id="message">Assalam o Alikum!</h1>
-      <button class="btn btn-primary" id="logOut">Log out</button>
-      <a href="../home/searchBar/searchBar.html">
-        <button class="btn btn-primary">Search User</button></a
-      >
-      <a href="./posts/posts.html"
-        ><button class="btn btn-primary">Posts</button></a
-      >
+      <div style="display: flex; justify-content: space-evenly">
+        <button class="btn btn-primary" id="logOut">Log out</button>
+        <a href="../home/searchBar/searchBar.html">
+          <button class="btn btn-primary">Search User</button></a
+        >
+        <a href="./posts/posts.html"
+          ><button class="btn btn-primary">Posts</button></a
+        >
+        <div>
+          <button class="btn btn-primary" id="deleteAccountBtn">
+            Delete Account
+          </button>
+        </div>
+      </div>
     </div>
 
     <!-- --------- -->
@@ -36,6 +43,18 @@
       <div class="modal-content">
         <p id="modalMessage"></p>
         <button class="btn btn-primary" onclick="closeModal()">OK</button>
+      </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="deleteModal" class="modalDelete">
+      <div class="modal-content-delete">
+        <h2>Are you sure?</h2>
+        <p>This action cannot be undone!</p>
+        <button class="btn btn-primary" id="confirmDeleteBtn">
+          Yes, Delete
+        </button>
+        <button class="btn btn-primary" id="cancelDeleteBtn">Cancel</button>
       </div>
     </div>
 

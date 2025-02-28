@@ -2,11 +2,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebas
 import {
   getAuth,
   signOut,
+  deleteUser,
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 import {
   getFirestore,
   doc,
   getDoc,
+  deleteDoc,
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
 // Firebase configuration
@@ -32,6 +34,8 @@ const db = getFirestore(app);
 let message = document.querySelector("#message");
 let logOut = document.querySelector("#logOut");
 let loadingSpinner = document.getElementById("loading-spinner");
+
+// loading spinner below
 
 function showLoadingSpinner() {
   loadingSpinner.style.display = "flex";
@@ -94,6 +98,67 @@ if (userData) {
     hideLoadingSpinner();
   }
 }
+
+// Function to Delete User Account
+const deleteAccount = async () => {
+  try {
+    const user = auth.currentUser; // Get currently logged-in user
+
+    if (!user) {
+      console.error("No user is logged in.");
+      return;
+    }
+
+    showLoadingSpinner();
+
+    // Delete user data from Firestore
+    const userRef = doc(db, "Users", user.uid);
+    await deleteDoc(userRef);
+    console.log("User data deleted from Firestore");
+
+    // Re-authentication may be required before deleting the user
+    await deleteUser(user);
+    console.log("User account deleted from Authentication");
+
+    // Remove user data from local storage
+    localStorage.removeItem("userData");
+
+    showModal("Account deleted successfully!");
+    setTimeout(() => window.location.replace("../signIn/signIn.html"), 2000);
+  } catch (error) {
+    console.error("Error deleting account:", error);
+
+    if (error.code === "auth/requires-recent-login") {
+      showModal("Please log in again before deleting your account.");
+    } else {
+      showModal("Failed to delete account. Please try again.");
+    }
+  } finally {
+    hideLoadingSpinner();
+  }
+};
+
+// ✅ Get modal elements
+const modal = document.getElementById("deleteModal");
+const deleteAccountBtn = document.getElementById("deleteAccountBtn");
+const confirmDeleteBtn = document.getElementById("confirmDeleteBtn");
+const cancelDeleteBtn = document.getElementById("cancelDeleteBtn");
+
+// ✅ Show modal when "Delete Account" button is clicked
+deleteAccountBtn.addEventListener("click", () => {
+  modal.style.display = "flex";
+});
+
+// ✅ Cancel button closes modal
+cancelDeleteBtn.addEventListener("click", () => {
+  modal.style.display = "none";
+});
+
+// ✅ Confirm deletion only when user clicks "Confirm Delete"
+confirmDeleteBtn.addEventListener("click", () => {
+  modal.style.display = "none"; // Hide modal before deletion
+  deleteAccount();
+});
 
 // Logout functionality
 logOut.addEventListener("click", async () => {

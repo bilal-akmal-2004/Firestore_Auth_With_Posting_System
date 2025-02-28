@@ -5,10 +5,12 @@ import {
   collection,
   getFirestore,
   getDocs,
+  getDoc,
   query,
   where,
   deleteDoc,
   onSnapshot,
+  arrayUnion,
   doc,
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
@@ -107,6 +109,7 @@ newPostButton.addEventListener("click", () => {
   allPostsDiv.style.display = "none";
   mainFormCreateUser.style.display = "block";
 });
+
 let createNewPost = async () => {
   let currenttime = getTime();
 
@@ -118,6 +121,7 @@ let createNewPost = async () => {
       id: userData.id,
       name: userData.userName,
       createdTime: currenttime,
+      likedBy: [],
     });
     console.log("Document written with ID: ", docRef.id);
     postHeading.value = ``;
@@ -271,64 +275,97 @@ document
 //  Listen for Real-Time Updates
 onSnapshot(collection(db, "posts"), (snapshot) => {
   savedPosts = snapshot.docs.map((doc) => ({
-    id: doc.id,
+    postUID: doc.id,
     ...doc.data(),
   }));
   console.log("Cached Posts Updated:", savedPosts);
 });
 
-//  Function to Display Posts
-const displayPosts = () => {
-  let counterPost = 0;
-  allPostsDiv.innerHTML = `<h1 style="
-    color: skyblue;
-    font-size: 65px; 
-    text-decoration: underline;
-    text-transform: uppercase;">All Posts</h1>`;
+// like button funcation yaaaaaaaaaaaaaaaaat?
+// ✅ Like Button Function
+const likeButton = async (postUID) => {
+  console.log("Clicked Post UID:", postUID);
 
-  savedPosts.forEach((post) => {
-    counterPost++;
-    allPostsDiv.innerHTML += `
-    
-     <div style="display: flex; justify-content: center;">
-      <div class="postDiv">
-       <div class="nameAndTime""
-  >
-      <h6>  <i class="fa-regular fa-user"></i> ${post.name}</h6>
-      <h6><i class="fa-regular fa-calendar"></i> ${post.createdTime}</h6>
-       </div>
-      <h1>${counterPost}: ${post.postHeading}</h1>
-      <h3>${post.postText}</h3></div>
-    </div>
-    `;
-  });
-};
+  if (!postUID) {
+    console.error("Error: postUID is undefined!");
+    return;
+  }
 
-//  Function to Get All Posts (Uses Cache First)
-let getAllPosts = async () => {
   try {
     showLoadingSpinner();
 
-    if (savedPosts.length > 0) {
-      console.log("Using cached posts...");
-      displayPosts();
+    const postRef = doc(db, "posts", postUID);
+    const postSnap = await getDoc(postRef);
+
+    if (postSnap.exists()) {
+      await updateDoc(postRef, {
+        likedBy: arrayUnion(userData?.id), // ✅ Ensure userData.id exists
+      });
+
+      console.log("Like added successfully!");
     } else {
-      console.log("Fetching posts from Firestore...");
-      const posts = await getDocs(collection(db, "posts"));
-
-      savedPosts = posts.docs.map((post) => ({
-        id: post.id,
-        ...post.data(),
-      }));
-
-      displayPosts();
+      console.error("Error: Post not found.");
     }
+
+    // ✅ Fetch updated posts and re-render
+    await getAllPosts(); // Function that fetches posts again
   } catch (error) {
-    console.error(error);
+    console.error("Error in likeButton:", error);
   } finally {
     hideLoadingSpinner();
   }
 };
+
+// ✅ Function to Display Posts
+const displayPosts = () => {
+  allPostsDiv.innerHTML = `<h1 style="color: skyblue; font-size: 65px; text-decoration: underline; text-transform: uppercase;">All Posts</h1>`;
+
+  savedPosts.forEach((post, index) => {
+    allPostsDiv.insertAdjacentHTML(
+      "beforeend",
+      `<div style="display: flex; justify-content: center;">
+        <div class="postDiv">
+          <div class="nameAndTime">
+            <h6><i class="fa-regular fa-user"></i> ${post.name}</h6>
+            <h6><i class="fa-regular fa-calendar"></i> ${post.createdTime}</h6>
+          </div>
+          <h1>${index + 1}: ${post.postHeading}</h1>
+          <h3>${post.postText}</h3>
+          <div class="likeButton-And-Likes">
+          <h4>Likes: ${post.likedBy.length}</h4>
+          <button class="like-btn" data-postid="${post.postUID}">Like❤️</button>
+          </div>
+        </div>
+      </div>`
+    );
+  });
+
+  // ✅ Attach event listeners correctly
+  document.querySelectorAll(".like-btn").forEach((button) => {
+    button.addEventListener("click", function () {
+      const postUID = this.dataset.postid; // Get postUID from button attribute
+      likeButton(postUID);
+    });
+  });
+};
+
+// ✅ Function to Fetch and Render Updated Posts
+const getAllPosts = async () => {
+  try {
+    const querySnapshot = await getDocs(collection(db, "posts"));
+    savedPosts = querySnapshot.docs.map((doc) => ({
+      postUID: doc.id,
+      ...doc.data(),
+    }));
+
+    displayPosts(); // ✅ Re-render posts with updated data
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+  }
+};
+
+// ✅ Fetch posts when the page loads
+getAllPosts();
 
 //  Attach Event Listener to Button
 allPostButton.addEventListener("click", () => {
