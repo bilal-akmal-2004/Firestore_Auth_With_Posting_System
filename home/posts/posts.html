@@ -109,6 +109,25 @@
       </div>
     </div>
 
+    <!-- ✅ Add Comment Modal -->
+    <div id="commentModal" class="modal">
+      <div class="modal-content" style="display: flex; gap: 10px">
+        <h2>Add Comment</h2>
+        <textarea id="commentInput" placeholder="Write a comment..."></textarea>
+        <button class="btn btn-primary" id="confirmCommentBtn">Confirm</button>
+        <button class="close-modal btn btn-primary">Cancel</button>
+      </div>
+    </div>
+
+    <!-- ✅ View Comments Modal -->
+    <div id="viewCommentsModal" class="modal">
+      <div class="modal-content">
+        <h2 style="border-bottom: 3px solid #0d6efd">Comments</h2>
+        <div id="commentsList"></div>
+        <button class="close-modal btn btn-primary">Close</button>
+      </div>
+    </div>
+
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"

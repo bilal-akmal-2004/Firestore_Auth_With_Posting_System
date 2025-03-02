@@ -111,14 +111,14 @@ const deleteAccount = async () => {
 
     showLoadingSpinner();
 
+    // Re-authentication may be required before deleting the user
+    await deleteUser(user);
+    console.log("User account deleted from Authentication");
+
     // Delete user data from Firestore
     const userRef = doc(db, "Users", user.uid);
     await deleteDoc(userRef);
     console.log("User data deleted from Firestore");
-
-    // Re-authentication may be required before deleting the user
-    await deleteUser(user);
-    console.log("User account deleted from Authentication");
 
     // Remove user data from local storage
     localStorage.removeItem("userData");

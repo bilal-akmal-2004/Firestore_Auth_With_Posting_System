@@ -122,6 +122,7 @@ let createNewPost = async () => {
       name: userData.userName,
       createdTime: currenttime,
       likedBy: [],
+      comments: [],
     });
     console.log("Document written with ID: ", docRef.id);
     postHeading.value = ``;
@@ -155,6 +156,7 @@ onSnapshot(q, (querySnapshot) => {
       postText: postData.postText,
       postId: post.id, // Ensure correct ID is stored
       createdTime: postData.createdTime,
+      updatedTime: postData.updatedTime,
     });
   });
 
@@ -166,7 +168,6 @@ onSnapshot(q, (querySnapshot) => {
 // Function to display My Posts from cache
 let showMyPosts = () => {
   try {
-    showLoadingSpinner();
     myPostsDiv.innerHTML = `<h1 style="font-size: 65px; text-decoration: underline;">My Posts</h1>`;
 
     mySavedPosts.forEach((post) => {
@@ -174,9 +175,17 @@ let showMyPosts = () => {
         <div class="post-item">
           <h2>${post.postHeading}</h2>
           <p>${post.postText}</p>
-          <h6>Created: ${post.createdTime}</h6>
-          <button class="btn btn-danger delete-btn w-25" data-id="${post.postId}">Delete</button>
-          <button class="btn btn-warning edit-btn w-25" data-id="${post.postId}" data-heading="${post.postHeading}" data-text="${post.postText}">Edit</button>
+          <h6>Created: ${post.updatedTime || post.createdTime} ${
+        post.updatedTime ? "(Updated)" : ""
+      }</h6>
+          <button class="btn btn-danger delete-btn w-25" data-id="${
+            post.postId
+          }">Delete</button>
+          <button class="btn btn-warning edit-btn w-25" data-id="${
+            post.postId
+          }" data-heading="${post.postHeading}" data-text="${
+        post.postText
+      }">Edit</button>
         </div>
       `;
     });
@@ -232,6 +241,7 @@ window.closeEditModal = () => {
 
 // Update Post (No need to manually refresh UI)
 let updatePost = async () => {
+  let currenttime = getTime();
   try {
     showLoadingSpinner();
     let postId = document
@@ -243,6 +253,7 @@ let updatePost = async () => {
     await updateDoc(doc(db, "posts", postId), {
       postHeading: updatedHeading,
       postText: updatedText,
+      updatedTime: currenttime,
     });
 
     showModal("Post updated successfully!");
@@ -279,6 +290,7 @@ onSnapshot(collection(db, "posts"), (snapshot) => {
     ...doc.data(),
   }));
   console.log("Cached Posts Updated:", savedPosts);
+  displayPosts();
 });
 
 // like button funcation yaaaaaaaaaaaaaaaaat?
@@ -291,31 +303,41 @@ const likeButton = async (postUID) => {
     return;
   }
 
+  // ✅ Find the post in savedPosts (cached data)
+  const post = savedPosts.find((p) => p.postUID === postUID);
+
+  if (!post) {
+    console.error("Error: Post not found in savedPosts.");
+    return;
+  }
+
+  // ✅ Check if the user has already liked this post
+  if (post.likedBy.includes(userData?.id)) {
+    showModal("You already liked the post!");
+    return; // ✅ Stop execution if already liked
+  }
+
   try {
-    showLoadingSpinner();
-
     const postRef = doc(db, "posts", postUID);
-    const postSnap = await getDoc(postRef);
 
-    if (postSnap.exists()) {
-      await updateDoc(postRef, {
-        likedBy: arrayUnion(userData?.id), // ✅ Ensure userData.id exists
-      });
+    // ✅ Update Firestore to add the like
+    await updateDoc(postRef, {
+      likedBy: arrayUnion(userData?.id),
+    });
 
-      console.log("Like added successfully!");
-    } else {
-      console.error("Error: Post not found.");
-    }
+    console.log("Like added successfully!");
 
-    // ✅ Fetch updated posts and re-render
-    await getAllPosts(); // Function that fetches posts again
+    // ✅ Update cached data immediately for faster UI updates
+    post.likedBy.push(userData.id);
+
+    // ✅ Refresh UI without fetching from Firestore
+    displayPosts();
   } catch (error) {
     console.error("Error in likeButton:", error);
-  } finally {
-    hideLoadingSpinner();
   }
 };
 
+// ✅ Function to Display Posts
 // ✅ Function to Display Posts
 const displayPosts = () => {
   allPostsDiv.innerHTML = `<h1 style="color: skyblue; font-size: 65px; text-decoration: underline; text-transform: uppercase;">All Posts</h1>`;
@@ -327,13 +349,27 @@ const displayPosts = () => {
         <div class="postDiv">
           <div class="nameAndTime">
             <h6><i class="fa-regular fa-user"></i> ${post.name}</h6>
-            <h6><i class="fa-regular fa-calendar"></i> ${post.createdTime}</h6>
+            <h6><i class="fa-regular fa-calendar"></i> ${
+              post.updatedTime || post.createdTime
+            } ${post.updatedTime ? "(Updated)" : ""}</h6>
           </div>
           <h1>${index + 1}: ${post.postHeading}</h1>
           <h3>${post.postText}</h3>
           <div class="likeButton-And-Likes">
-          <h4>Likes: ${post.likedBy.length}</h4>
-          <button class="like-btn" data-postid="${post.postUID}">Like❤️</button>
+            <h4>Likes: ${post.likedBy.length}</h4>
+            <button class="like-btn" data-postid="${
+              post.postUID
+            }">Like❤️</button>
+          </div>
+          <div class="comment-buttons">
+            <button class="add-comment-btn btn btn-primary" data-postid="${
+              post.postUID
+            }">Add Comment 💬</button>
+            <button class="view-comments-btn btn btn-primary" data-postid="${
+              post.postUID
+            }">View Comments (${
+        post.comments ? post.comments.length : 0
+      })</button>
           </div>
         </div>
       </div>`
@@ -343,11 +379,136 @@ const displayPosts = () => {
   // ✅ Attach event listeners correctly
   document.querySelectorAll(".like-btn").forEach((button) => {
     button.addEventListener("click", function () {
-      const postUID = this.dataset.postid; // Get postUID from button attribute
+      const postUID = this.dataset.postid;
       likeButton(postUID);
     });
   });
+
+  document.querySelectorAll(".add-comment-btn").forEach((button) => {
+    button.addEventListener("click", function () {
+      const postUID = this.dataset.postid;
+      openAddCommentModal(postUID);
+    });
+  });
+
+  document.querySelectorAll(".view-comments-btn").forEach((button) => {
+    button.addEventListener("click", function () {
+      const postUID = this.dataset.postid;
+      openViewCommentsModal(postUID);
+    });
+  });
 };
+
+// ✅ Function to Open Add Comment Modal
+const openAddCommentModal = (postUID) => {
+  console.log("Opening Add Comment Modal for Post ID:", postUID);
+  const modal = document.getElementById("commentModal");
+  if (!modal) {
+    console.error("commentModal not found!");
+    return;
+  }
+  modal.style.display = "flex";
+
+  const confirmBtn = document.getElementById("confirmCommentBtn");
+  if (!confirmBtn) {
+    console.error("confirmCommentBtn not found!");
+    return;
+  }
+
+  // ✅ Remove any existing event listeners to prevent duplicate listeners
+  confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+  const newConfirmBtn = document.getElementById("confirmCommentBtn");
+  newConfirmBtn.dataset.postid = postUID;
+
+  // ✅ Add event listener to submit the comment
+  newConfirmBtn.addEventListener("click", async () => {
+    await addCommentToPost(postUID);
+  });
+};
+
+// ✅ Function to Add a Comment to Firestore
+const addCommentToPost = async (postUID) => {
+  const commentInput = document.getElementById("commentInput");
+  if (!commentInput.value.trim()) {
+    alert("Comment cannot be empty!");
+    return;
+  }
+
+  const commentData = {
+    comment: commentInput.value.trim(),
+    name: userData.userName, // Assuming `userData` contains logged-in user info
+    date: new Date().toLocaleString(),
+  };
+
+  try {
+    const postRef = doc(db, "posts", postUID);
+
+    // ✅ Add comment to Firestore using `arrayUnion`
+    await updateDoc(postRef, {
+      comments: arrayUnion(commentData),
+    });
+
+    console.log("Comment added successfully!");
+    showModal("Comment added!");
+    commentInput.value = ""; // Clear input field
+    document.getElementById("commentModal").style.display = "none"; // Close modal
+  } catch (error) {
+    console.error("Error adding comment:", error);
+    showModal("Failed to add comment. Please try again.");
+  }
+};
+
+// ✅ Function to Open View Comments Modal
+const openViewCommentsModal = (postUID) => {
+  console.log("Opening View Comments Modal for Post ID:", postUID);
+  const modal = document.getElementById("viewCommentsModal");
+  if (!modal) {
+    console.error("viewCommentsModal not found!");
+    return;
+  }
+
+  // ✅ Find the post in the cached `savedPosts` array
+  const postData = savedPosts.find((post) => post.postUID === postUID);
+
+  if (!postData) {
+    console.error("Post not found in cache!");
+    showModal("Post not found!");
+    return;
+  }
+
+  const commentsDiv = document.getElementById("commentsList");
+  if (!commentsDiv) {
+    console.error("commentsList not found!");
+    return;
+  }
+
+  // ✅ Clear previous comments
+  commentsDiv.innerHTML = "";
+
+  if (!postData.comments || postData.comments.length === 0) {
+    commentsDiv.innerHTML = "<p>No comments yet.</p>";
+  } else {
+    postData.comments.forEach((comment) => {
+      commentsDiv.insertAdjacentHTML(
+        "beforeend",
+        `<div class="comment">
+           <p style="border-bottom: 1px solid black; border-radius: 10px; padding: 5px;">
+           <strong>${comment.name}</strong> (${comment.date}):</p>
+           <p>${comment.comment}</p>
+         </div>`
+      );
+    });
+  }
+
+  modal.style.display = "flex"; // Show modal
+};
+
+// ✅ Function to Close Modals
+document.querySelectorAll(".close-modal").forEach((button) => {
+  button.addEventListener("click", function () {
+    this.closest(".modal").style.display = "none";
+  });
+});
 
 // ✅ Function to Fetch and Render Updated Posts
 const getAllPosts = async () => {
