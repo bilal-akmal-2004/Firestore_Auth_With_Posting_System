@@ -72,10 +72,9 @@ label{
     background-color: #0a357ea3;
   }
   .likeButton-And-Likes{
-       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-direction: row-reverse;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
     }
     
   @keyframes spin {
@@ -165,11 +164,12 @@ label{
 
  .nameAndTime{
   border: 3px solid white;
-  border-radius: 10px;
-  padding: 4px;
-  margin-top: 4px;
-  display: flex;
-  justify-content: space-between;
+    border-radius: 10px;
+    padding: 4px;
+    margin-top: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
  }
  #allPostsDiv{
   display: flex;
@@ -183,6 +183,28 @@ label{
   border-radius: 6px;
   border-bottom: 8px solid white;
   padding: 10px;
+ }
+
+ .displayLikesAndLikedBy{
+      display: flex;
+      flex-direction: row-reverse;
+      gap: 10px;
+      align-items: center;
+ }
+
+ .likedByButton{
+  padding: 0px;
+  border-radius: 10px;
+  background-color: #0c2d62b3;
+  color: white;
+ }
+
+ #likedByModal{
+  border-radius: 30px;
+ }
+
+ .addFreind{
+  border-radius: 10px;
  }
 
 

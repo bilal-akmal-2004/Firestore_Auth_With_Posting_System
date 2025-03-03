@@ -8,6 +8,10 @@ import {
   getFirestore,
   doc,
   getDoc,
+  query,
+  collection,
+  where,
+  getDocs,
   deleteDoc,
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
@@ -119,6 +123,18 @@ const deleteAccount = async () => {
     const userRef = doc(db, "Users", user.uid);
     await deleteDoc(userRef);
     console.log("User data deleted from Firestore");
+
+    //Delete all posts created by the user
+    const postsQuery = query(
+      collection(db, "posts"),
+      where("id", "==", user.uid)
+    );
+    const postsSnapshot = await getDocs(postsQuery);
+    const deletePostPromises = postsSnapshot.docs.map((docSnap) =>
+      deleteDoc(doc(db, "posts", docSnap.id))
+    );
+    await Promise.all(deletePostPromises);
+    console.log("User posts deleted from Firestore");
 
     // Remove user data from local storage
     localStorage.removeItem("userData");

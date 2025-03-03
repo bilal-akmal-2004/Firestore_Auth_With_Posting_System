@@ -11,6 +11,7 @@ import {
   deleteDoc,
   onSnapshot,
   arrayUnion,
+  arrayRemove,
   doc,
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
@@ -102,6 +103,8 @@ let myPostsDiv = document.querySelector("#myPostsDiv");
 myPostsDiv.style.display = "none";
 let mainFormCreateUser = document.querySelector("#mainFormCreateUser");
 mainFormCreateUser.style.display = "none";
+let freindRequests = document.getElementById("freindRequests");
+let freindsPosts = document.getElementById("freindsPosts");
 
 // for creating new post and other stuff
 newPostButton.addEventListener("click", () => {
@@ -338,7 +341,6 @@ const likeButton = async (postUID) => {
 };
 
 // ✅ Function to Display Posts
-// ✅ Function to Display Posts
 const displayPosts = () => {
   allPostsDiv.innerHTML = `<h1 style="color: skyblue; font-size: 65px; text-decoration: underline; text-transform: uppercase;">All Posts</h1>`;
 
@@ -349,17 +351,27 @@ const displayPosts = () => {
         <div class="postDiv">
           <div class="nameAndTime">
             <h6><i class="fa-regular fa-user"></i> ${post.name}</h6>
-            <h6><i class="fa-regular fa-calendar"></i> ${
-              post.updatedTime || post.createdTime
-            } ${post.updatedTime ? "(Updated)" : ""}</h6>
+            <h6>
+              <button class="addFreind" data-userid="${post.id}">
+                <i class="fa-solid fa-user-plus"></i>
+              </button>
+              <i class="fa-regular fa-calendar"></i> ${
+                post.updatedTime || post.createdTime
+              } ${post.updatedTime ? "(Updated)" : ""}
+            </h6>
           </div>
           <h1>${index + 1}: ${post.postHeading}</h1>
           <h3>${post.postText}</h3>
           <div class="likeButton-And-Likes">
-            <h4>Likes: ${post.likedBy.length}</h4>
             <button class="like-btn" data-postid="${
               post.postUID
             }">Like❤️</button>
+            <div class="displayLikesAndLikedBy">
+              <button class="liked-by-btn likedByButton" data-postid="${
+                post.postUID
+              }">Liked By 👥</button>
+              <h4>Likes: ${post.likedBy.length}</h4>
+            </div>
           </div>
           <div class="comment-buttons">
             <button class="add-comment-btn btn btn-primary" data-postid="${
@@ -376,11 +388,26 @@ const displayPosts = () => {
     );
   });
 
+  document.querySelectorAll(".addFreind").forEach((button) => {
+    button.addEventListener("click", function () {
+      // Get the recipient's UID from the data attribute
+      const recipientUID = this.dataset.userid;
+      sendFriendRequest(recipientUID);
+    });
+  });
+
   // ✅ Attach event listeners correctly
   document.querySelectorAll(".like-btn").forEach((button) => {
     button.addEventListener("click", function () {
       const postUID = this.dataset.postid;
       likeButton(postUID);
+    });
+  });
+
+  document.querySelectorAll(".liked-by-btn").forEach((button) => {
+    button.addEventListener("click", function () {
+      const postUID = this.dataset.postid;
+      openLikedByModal(postUID);
     });
   });
 
@@ -396,6 +423,95 @@ const displayPosts = () => {
       const postUID = this.dataset.postid;
       openViewCommentsModal(postUID);
     });
+  });
+};
+
+const sendFriendRequest = async (recipientUID) => {
+  try {
+    // Get a reference to the recipient's document in the "Users" collection
+    const userRef = doc(db, "Users", recipientUID);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) {
+      showModal("Recipient not found.");
+      return;
+    }
+
+    const recipientData = userSnap.data();
+
+    // Check if the current user already sent a friend request
+    if (
+      recipientData.friendRequests &&
+      recipientData.friendRequests.includes(userData.id)
+    ) {
+      showModal("Friend request already sent!");
+      return;
+    }
+
+    // Check if they are already friends
+    if (recipientData.friends && recipientData.friends.includes(userData.id)) {
+      showModal("You are already friends!");
+      return;
+    }
+    if (recipientUID === userData.id) {
+      showModal("You cannot send a friend request to yourself!");
+      return;
+    }
+
+    // If all checks pass, add the current user's UID to the recipient's friendRequests array
+    await updateDoc(userRef, {
+      friendRequests: arrayUnion(userData.id),
+    });
+
+    showModal("Friend request sent!");
+  } catch (error) {
+    console.error("Error sending friend request:", error);
+    showModal("Failed to send friend request. Please try again.");
+  }
+};
+
+const openLikedByModal = (postUID) => {
+  const post = savedPosts.find((p) => p.postUID === postUID);
+
+  if (!post || post.likedBy.length === 0) {
+    alert("No likes yet!");
+    return;
+  }
+
+  // 🔄 Create a fresh user lookup map each time (to stay updated)
+  const userMap = {};
+  savedPosts.forEach((p) => {
+    userMap[p.id] = p.name; // Map user UID to name
+  });
+
+  // Find names of users who liked the post
+  const likedUserNames = post.likedBy
+    .map((userUID) => userMap[userUID] || "Unknown User")
+    .filter((name) => name !== "Unknown User");
+
+  // Create modal dynamically
+  let modal = document.createElement("dialog");
+  modal.setAttribute("id", "likedByModal");
+  modal.innerHTML = `
+    <div style="text-align: center; padding: 20px; border-radius: 10px; background: white; box-shadow: 0px 4px 6px rgba(0,0,0,0.1);">
+      <h2>Liked By:</h2>
+      <ul>${
+        likedUserNames.map((name) => `<li>${name}</li>`).join("") ||
+        "<li>No users found</li>"
+      }</ul>
+      <button class="btn btn-primary" id="closeLikedByModal">Close</button>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  // Show the modal
+  modal.showModal();
+
+  // Close button functionality
+  document.getElementById("closeLikedByModal").addEventListener("click", () => {
+    modal.close();
+    modal.remove();
   });
 };
 
@@ -534,4 +650,254 @@ allPostButton.addEventListener("click", () => {
   mainFormCreateUser.style.display = "none";
   allPostsDiv.style.display = "flex";
   getAllPosts();
+});
+
+// Function to show friend requests in a modal
+const showFriendRequests = async () => {
+  try {
+    showLoadingSpinner();
+    // Get current user's document from the "Users" collection (ensure collection name matches your structure)
+    const userDocRef = doc(db, "Users", userData.id);
+    const userDocSnap = await getDoc(userDocRef);
+
+    if (userDocSnap.exists()) {
+      const data = userDocSnap.data();
+      const friendRequests = data.friendRequests || [];
+
+      if (friendRequests.length === 0) {
+        showModal("No requests available");
+      } else {
+        // For each UID in friendRequests, fetch the user's name
+        const friendRequestsInfo = await Promise.all(
+          friendRequests.map(async (friendUID) => {
+            const friendDocSnap = await getDoc(doc(db, "Users", friendUID));
+            if (friendDocSnap.exists()) {
+              const friendData = friendDocSnap.data();
+              return {
+                uid: friendUID,
+                name: `${friendData.firstName} ${friendData.lastName || ""}`,
+              };
+            } else {
+              return { uid: friendUID, name: "Unknown User" };
+            }
+          })
+        );
+
+        // Build HTML list with an Accept button for each friend request
+        let requestsHtml = "<ul>";
+        friendRequestsInfo.forEach((info) => {
+          requestsHtml += `<li>
+            ${info.name} 
+            <button class="accept-btn btn btn-success" data-uid="${info.uid}">Accept</button>
+          </li>`;
+        });
+        requestsHtml += "</ul>";
+
+        // Create and show the modal dynamically
+        let modal = document.createElement("dialog");
+        modal.setAttribute("id", "friendRequestsModal");
+        modal.innerHTML = `
+          <div style="padding:20px; border-radius:10px; background:white; box-shadow: 0px 4px 6px rgba(0,0,0,0.1); text-align:center;">
+            <h2>Friend Requests</h2>
+            ${requestsHtml}
+            <button id="closeFriendRequestsModal" class="btn btn-primary">Close</button>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        modal.showModal();
+
+        // Attach event listeners for Accept buttons
+        document.querySelectorAll(".accept-btn").forEach((button) => {
+          button.addEventListener("click", async function () {
+            const friendUID = this.dataset.uid;
+            await acceptFriendRequest(friendUID);
+            // Optionally, remove this request from the modal UI
+            this.parentElement.remove();
+          });
+        });
+
+        // Attach event listener for closing the modal
+        document
+          .getElementById("closeFriendRequestsModal")
+          .addEventListener("click", () => {
+            modal.close();
+            modal.remove();
+          });
+      }
+    } else {
+      showModal("User document not found");
+    }
+  } catch (error) {
+    console.error("Error fetching friend requests:", error);
+    showModal("Error fetching friend requests");
+  } finally {
+    hideLoadingSpinner();
+  }
+};
+
+// Function to accept a friend request
+const acceptFriendRequest = async (friendUID) => {
+  try {
+    // Update current user's document: remove friendUID from friendRequests and add it to friends
+    const userDocRef = doc(db, "Users", userData.id);
+    await updateDoc(userDocRef, {
+      friendRequests: arrayRemove(friendUID),
+      friends: arrayUnion(friendUID),
+    });
+
+    // Optionally, update the friend's document to add current user's UID to their friends array
+    const friendDocRef = doc(db, "Users", friendUID);
+    await updateDoc(friendDocRef, {
+      friends: arrayUnion(userData.id),
+    });
+
+    console.log("Friend request accepted!");
+  } catch (error) {
+    console.error("Error accepting friend request:", error);
+    showModal("Error accepting friend request");
+  }
+};
+
+// Attach the function to the "freindRequests" button in your navbar
+freindRequests.addEventListener("click", () => {
+  myPostsDiv.style.display = "none";
+  mainFormCreateUser.style.display = "none";
+  allPostsDiv.style.display = "flex";
+  showFriendRequests();
+});
+
+// Function to display only friends' posts
+const displayFriendsPosts = async () => {
+  try {
+    console.log("displayFriendsPosts: Starting function.");
+    showLoadingSpinner();
+
+    // 1. Get the current user's document from the "Users" collection.
+    // (Change "Users" to "users" if needed.)
+    const currentUserDocRef = doc(db, "Users", userData.id);
+    const currentUserDocSnap = await getDoc(currentUserDocRef);
+
+    if (!currentUserDocSnap.exists()) {
+      console.error("Current user document not found.");
+      showModal("User document not found.");
+      return;
+    }
+
+    const currentUserData = currentUserDocSnap.data();
+    const friendsArray = currentUserData.friends || [];
+    console.log("displayFriendsPosts: Friends array:", friendsArray);
+
+    if (friendsArray.length === 0) {
+      showModal("You have no friends added.");
+      return;
+    }
+
+    // 2. Query posts where the "id" field (owner's UID) is in the friends array.
+    // Note: The "in" operator accepts up to 10 values. If your friends list is longer, you'll need to batch queries.
+    const friendsPostsQuery = query(
+      collection(db, "posts"),
+      where("id", "in", friendsArray)
+    );
+    console.log("displayFriendsPosts: Running query with friendsArray.");
+
+    const querySnapshot = await getDocs(friendsPostsQuery);
+    console.log(
+      "displayFriendsPosts: Query snapshot size:",
+      querySnapshot.size
+    );
+
+    const friendsPosts = querySnapshot.docs.map((doc) => ({
+      postUID: doc.id,
+      ...doc.data(),
+    }));
+    console.log("displayFriendsPosts: Friends posts fetched:", friendsPosts);
+
+    // 3. Display these posts using a dedicated UI function.
+    displayFriendsPostsUI(friendsPosts);
+  } catch (error) {
+    console.error("Error fetching friend's posts:", error);
+    showModal("Error fetching friend's posts.");
+  } finally {
+    console.log("displayFriendsPosts: Hiding spinner.");
+    hideLoadingSpinner();
+  }
+};
+
+// Helper function to render friends' posts
+const displayFriendsPostsUI = (posts) => {
+  // Update header to indicate we're showing friends' posts.
+  allPostsDiv.innerHTML = `<h1 style="color: skyblue; font-size: 65px; text-decoration: underline; text-transform: uppercase;">Friends' Posts</h1>`;
+
+  posts.forEach((post, index) => {
+    allPostsDiv.insertAdjacentHTML(
+      "beforeend",
+      `<div style="display: flex; justify-content: center;">
+        <div style="width: 100%" class="postDiv">
+          <div class="nameAndTime">
+            <h6><i class="fa-regular fa-user"></i> ${post.name}</h6>
+            <h6><i class="fa-regular fa-calendar"></i> ${
+              post.updatedTime || post.createdTime
+            } ${post.updatedTime ? "(Updated)" : ""}</h6>
+          </div>
+          <h1>${index + 1}: ${post.postHeading}</h1>
+          <h3>${post.postText}</h3>
+          <div class="likeButton-And-Likes">
+            <button class="like-btn" data-postid="${
+              post.postUID
+            }">Like❤️</button>
+            <div class="displayLikesAndLikedBy">
+              <button class="liked-by-btn likedByButton" data-postid="${
+                post.postUID
+              }">Liked By 👥</button>
+              <h4>Likes: ${post.likedBy.length}</h4>
+            </div>
+          </div>
+          <div class="comment-buttons">
+            <button class="add-comment-btn btn btn-primary" data-postid="${
+              post.postUID
+            }">Add Comment 💬</button>
+            <button class="view-comments-btn btn btn-primary" data-postid="${
+              post.postUID
+            }">View Comments (${
+        post.comments ? post.comments.length : 0
+      })</button>
+          </div>
+        </div>
+      </div>`
+    );
+  });
+
+  // Attach event listeners (reuse existing functions)
+  document.querySelectorAll(".like-btn").forEach((button) => {
+    button.addEventListener("click", function () {
+      const postUID = this.dataset.postid;
+      likeButton(postUID);
+    });
+  });
+  document.querySelectorAll(".liked-by-btn").forEach((button) => {
+    button.addEventListener("click", function () {
+      const postUID = this.dataset.postid;
+      openLikedByModal(postUID);
+    });
+  });
+  document.querySelectorAll(".add-comment-btn").forEach((button) => {
+    button.addEventListener("click", function () {
+      const postUID = this.dataset.postid;
+      openAddCommentModal(postUID);
+    });
+  });
+  document.querySelectorAll(".view-comments-btn").forEach((button) => {
+    button.addEventListener("click", function () {
+      const postUID = this.dataset.postid;
+      openViewCommentsModal(postUID);
+    });
+  });
+};
+
+// Attach the displayFriendsPosts function to the "freindsPosts" button in your navbar
+freindsPosts.addEventListener("click", () => {
+  myPostsDiv.style.display = "none";
+  mainFormCreateUser.style.display = "none";
+  allPostsDiv.style.display = "flex";
+  displayFriendsPosts();
 });

@@ -146,6 +146,8 @@ let registerData = async (event) => {
       email: emailInp.value,
       section: selectBox.value,
       gender: radioValue(),
+      friendRequests: [],
+      friends: [],
     });
 
     console.log("Data written successfully!");
@@ -199,6 +201,8 @@ document.getElementById("google-login").addEventListener("click", async () => {
         id: user.uid,
         firstName: user.displayName,
         email: user.email,
+        friendRequests: [],
+        friends: [],
       });
       console.log("User data stored successfully.");
     } else {
