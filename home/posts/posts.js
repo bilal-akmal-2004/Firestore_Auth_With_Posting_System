@@ -4,6 +4,7 @@ import {
   addDoc,
   collection,
   getFirestore,
+  serverTimestamp,
   getDocs,
   getDoc,
   query,
@@ -81,7 +82,7 @@ function hideLoadingSpinner() {
 
 //-----------------modal functions----------------
 let showModal = (message) => {
-  document.getElementById("modalMessage").innerText = message;
+  document.getElementById("modalMessage").innerHTML = message;
   document.getElementById("popupModal").style.display = "flex";
 };
 
@@ -104,7 +105,7 @@ myPostsDiv.style.display = "none";
 let mainFormCreateUser = document.querySelector("#mainFormCreateUser");
 mainFormCreateUser.style.display = "none";
 let freindRequests = document.getElementById("freindRequests");
-let freindsPosts = document.getElementById("freindsPosts");
+let chatWithFriends = document.getElementById("chatWithFriends");
 
 // for creating new post and other stuff
 newPostButton.addEventListener("click", () => {
@@ -474,7 +475,7 @@ const openLikedByModal = (postUID) => {
   const post = savedPosts.find((p) => p.postUID === postUID);
 
   if (!post || post.likedBy.length === 0) {
-    alert("No likes yet!");
+    showModal("No likes yet!");
     return;
   }
 
@@ -766,138 +767,181 @@ freindRequests.addEventListener("click", () => {
   showFriendRequests();
 });
 
-// Function to display only friends' posts
-const displayFriendsPosts = async () => {
+// // Function to display only friends' posts
+// const displayFriendsPosts = async () => {
+//   try {
+//     console.log("displayFriendsPosts: Starting function.");
+//     showLoadingSpinner();
+
+//     // 1. Get the current user's document from the "Users" collection.
+//     // (Change "Users" to "users" if needed.)
+//     const currentUserDocRef = doc(db, "Users", userData.id);
+//     const currentUserDocSnap = await getDoc(currentUserDocRef);
+
+//     if (!currentUserDocSnap.exists()) {
+//       console.error("Current user document not found.");
+//       showModal("User document not found.");
+//       return;
+//     }
+
+//     const currentUserData = currentUserDocSnap.data();
+//     const friendsArray = currentUserData.friends || [];
+//     console.log("displayFriendsPosts: Friends array:", friendsArray);
+
+//     if (friendsArray.length === 0) {
+//       showModal("You have no friends added.");
+//       return;
+//     }
+
+//     // 2. Query posts where the "id" field (owner's UID) is in the friends array.
+//     // Note: The "in" operator accepts up to 10 values. If your friends list is longer, you'll need to batch queries.
+//     const friendsPostsQuery = query(
+//       collection(db, "posts"),
+//       where("id", "in", friendsArray)
+//     );
+//     console.log("displayFriendsPosts: Running query with friendsArray.");
+
+//     const querySnapshot = await getDocs(friendsPostsQuery);
+//     console.log(
+//       "displayFriendsPosts: Query snapshot size:",
+//       querySnapshot.size
+//     );
+
+//     const friendsPosts = querySnapshot.docs.map((doc) => ({
+//       postUID: doc.id,
+//       ...doc.data(),
+//     }));
+//     console.log("displayFriendsPosts: Friends posts fetched:", friendsPosts);
+
+//     // 3. Display these posts using a dedicated UI function.
+//     displayFriendsPostsUI(friendsPosts);
+//   } catch (error) {
+//     console.error("Error fetching friend's posts:", error);
+//     showModal("Error fetching friend's posts.");
+//   } finally {
+//     console.log("displayFriendsPosts: Hiding spinner.");
+//     hideLoadingSpinner();
+//   }
+// };
+
+// FIRENDS FOR THATA CAHTTING SYSTME
+async function showFriendsModal(friendsList) {
+  showLoadingSpinner();
+  let modalContent = "<h3>Your Friends</h3><div id='friendsList'></div>";
+
   try {
-    console.log("displayFriendsPosts: Starting function.");
-    showLoadingSpinner();
-
-    // 1. Get the current user's document from the "Users" collection.
-    // (Change "Users" to "users" if needed.)
-    const currentUserDocRef = doc(db, "Users", userData.id);
-    const currentUserDocSnap = await getDoc(currentUserDocRef);
-
-    if (!currentUserDocSnap.exists()) {
-      console.error("Current user document not found.");
-      showModal("User document not found.");
-      return;
-    }
-
-    const currentUserData = currentUserDocSnap.data();
-    const friendsArray = currentUserData.friends || [];
-    console.log("displayFriendsPosts: Friends array:", friendsArray);
-
-    if (friendsArray.length === 0) {
-      showModal("You have no friends added.");
-      return;
-    }
-
-    // 2. Query posts where the "id" field (owner's UID) is in the friends array.
-    // Note: The "in" operator accepts up to 10 values. If your friends list is longer, you'll need to batch queries.
-    const friendsPostsQuery = query(
-      collection(db, "posts"),
-      where("id", "in", friendsArray)
-    );
-    console.log("displayFriendsPosts: Running query with friendsArray.");
-
-    const querySnapshot = await getDocs(friendsPostsQuery);
-    console.log(
-      "displayFriendsPosts: Query snapshot size:",
-      querySnapshot.size
+    // Convert friend IDs into Firestore document references
+    const friendRefs = friendsList.map((friendId) =>
+      doc(db, "Users", friendId)
     );
 
-    const friendsPosts = querySnapshot.docs.map((doc) => ({
-      postUID: doc.id,
-      ...doc.data(),
-    }));
-    console.log("displayFriendsPosts: Friends posts fetched:", friendsPosts);
+    // Fetch all friends in parallel
+    const friendSnapshots = await Promise.all(
+      friendRefs.map((friendRef) => getDoc(friendRef))
+    );
 
-    // 3. Display these posts using a dedicated UI function.
-    displayFriendsPostsUI(friendsPosts);
+    showModal(modalContent);
+
+    // Get the friends list container
+    const friendsListContainer = document.getElementById("friendsList");
+
+    // Process and display each friend
+    friendSnapshots.forEach((friendSnap, index) => {
+      if (friendSnap.exists()) {
+        const friendName = friendSnap.data().firstName || "Unknown User";
+        const friendId = friendsList[index];
+
+        // Create button element
+        const button = document.createElement("button");
+        button.textContent = `Chat with ${friendName}`;
+        button.style.borderRadius = "20px";
+
+        // Attach event listener correctly
+        button.addEventListener("click", () => openChat(friendId, friendName));
+
+        // Append button to the modal
+        friendsListContainer.appendChild(button);
+        friendsListContainer.appendChild(document.createElement("br"));
+      }
+    });
   } catch (error) {
-    console.error("Error fetching friend's posts:", error);
-    showModal("Error fetching friend's posts.");
+    console.log(error);
   } finally {
-    console.log("displayFriendsPosts: Hiding spinner.");
     hideLoadingSpinner();
   }
-};
+}
 
-// Helper function to render friends' posts
-const displayFriendsPostsUI = (posts) => {
-  // Update header to indicate we're showing friends' posts.
-  allPostsDiv.innerHTML = `<h1 style="color: skyblue; font-size: 65px; text-decoration: underline; text-transform: uppercase;">Friends' Posts</h1>`;
+async function openChat(friendId, friendName) {
+  const chatId = generateChatId(userData.id, friendId);
 
-  posts.forEach((post, index) => {
-    allPostsDiv.insertAdjacentHTML(
-      "beforeend",
-      `<div style="display: flex; justify-content: center;">
-        <div style="width: 100%" class="postDiv">
-          <div class="nameAndTime">
-            <h6><i class="fa-regular fa-user"></i> ${post.name}</h6>
-            <h6><i class="fa-regular fa-calendar"></i> ${
-              post.updatedTime || post.createdTime
-            } ${post.updatedTime ? "(Updated)" : ""}</h6>
-          </div>
-          <h1>${index + 1}: ${post.postHeading}</h1>
-          <h3>${post.postText}</h3>
-          <div class="likeButton-And-Likes">
-            <button class="like-btn" data-postid="${
-              post.postUID
-            }">Like❤️</button>
-            <div class="displayLikesAndLikedBy">
-              <button class="liked-by-btn likedByButton" data-postid="${
-                post.postUID
-              }">Liked By 👥</button>
-              <h4>Likes: ${post.likedBy.length}</h4>
-            </div>
-          </div>
-          <div class="comment-buttons">
-            <button class="add-comment-btn btn btn-primary" data-postid="${
-              post.postUID
-            }">Add Comment 💬</button>
-            <button class="view-comments-btn btn btn-primary" data-postid="${
-              post.postUID
-            }">View Comments (${
-        post.comments ? post.comments.length : 0
-      })</button>
-          </div>
-        </div>
-      </div>`
-    );
+  // Create modal content
+  showModal(`<h3>Chat with ${friendName}</h3>
+      <div id="chatMessages"></div>
+      <input type="text" id="messageInput" placeholder="Type a message..." />
+      <button id="sendMessageBtn">Send</button>
+  `);
+
+  // Start listening for new messages
+  listenForMessages(chatId, friendName);
+
+  // Attach event listener to the send button after the modal is shown
+  document.getElementById("sendMessageBtn").addEventListener("click", () => {
+    sendMessage(chatId, friendId);
+  });
+}
+
+function generateChatId(userId1, userId2) {
+  return userId1 < userId2 ? `${userId1}_${userId2}` : `${userId2}_${userId1}`;
+}
+
+async function listenForMessages(chatId, friendName) {
+  const chatRef = collection(db, "chats", chatId, "messages");
+  onSnapshot(chatRef, (snapshot) => {
+    let messagesHtml = "";
+    snapshot.forEach((doc) => {
+      const message = doc.data();
+      messagesHtml += `<p><strong>${
+        message.senderId === userData.id ? "YOU" : friendName
+      }:</strong> ${message.text}</p>`;
+    });
+    document.getElementById("chatMessages").innerHTML = messagesHtml;
+  });
+}
+
+async function sendMessage(chatId, receiverId) {
+  const messageInput = document.getElementById("messageInput");
+  if (!messageInput.value.trim()) return;
+
+  const chatRef = collection(db, "chats", chatId, "messages");
+  await addDoc(chatRef, {
+    senderId: userData.id,
+    receiverId,
+    text: messageInput.value.trim(),
+    timestamp: serverTimestamp(),
   });
 
-  // Attach event listeners (reuse existing functions)
-  document.querySelectorAll(".like-btn").forEach((button) => {
-    button.addEventListener("click", function () {
-      const postUID = this.dataset.postid;
-      likeButton(postUID);
-    });
-  });
-  document.querySelectorAll(".liked-by-btn").forEach((button) => {
-    button.addEventListener("click", function () {
-      const postUID = this.dataset.postid;
-      openLikedByModal(postUID);
-    });
-  });
-  document.querySelectorAll(".add-comment-btn").forEach((button) => {
-    button.addEventListener("click", function () {
-      const postUID = this.dataset.postid;
-      openAddCommentModal(postUID);
-    });
-  });
-  document.querySelectorAll(".view-comments-btn").forEach((button) => {
-    button.addEventListener("click", function () {
-      const postUID = this.dataset.postid;
-      openViewCommentsModal(postUID);
-    });
-  });
-};
+  messageInput.value = "";
+}
 
-// Attach the displayFriendsPosts function to the "freindsPosts" button in your navbar
-freindsPosts.addEventListener("click", () => {
+// Attach the displayFriendsPosts function to the "chatWithFriends" button in your navbar
+chatWithFriends.addEventListener("click", async () => {
+  console.log(userData.id);
   myPostsDiv.style.display = "none";
   mainFormCreateUser.style.display = "none";
   allPostsDiv.style.display = "flex";
-  displayFriendsPosts();
+
+  // const userId = auth.currentUser?.uid;
+  // if (!userId) return showModal("Please log in first!");
+
+  // Fetch user's friends from Firestore
+  const userRef = doc(db, "Users", userData.id);
+  const userSnap = await getDoc(userRef);
+
+  if (!userSnap.exists() || !userSnap.data().friends?.length) {
+    return showModal("You have no friends 😢");
+  }
+
+  const friendsList = userSnap.data().friends;
+  console.log(friendsList);
+  showFriendsModal(friendsList);
 });

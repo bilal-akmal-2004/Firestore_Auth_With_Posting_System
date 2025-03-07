@@ -100,6 +100,12 @@ label{
       align-items: center;
       z-index: 10;
       }
+
+      #modalMessage{
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+      }
       
       .modal-content {
         position: absolute;
