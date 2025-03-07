@@ -11,6 +11,7 @@ body{
     display: flex;
     gap: 10px;
     width: 100%;
+    align-items: center;
     position: fixed;
     justify-content: space-evenly;
 }
@@ -111,6 +112,9 @@ label{
         position: absolute;
         top: 200px;
         width: 35%;
+        
+   
+    overflow: scroll;
         background: white;
         padding: 20px;
         border-radius: 10px;
@@ -150,9 +154,9 @@ label{
   background: white;
   gap: 10px;
   padding: 20px;
+  height: 300px;
   border-radius: 10px;
   text-align: center;
-  width: 40%;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
@@ -212,13 +216,68 @@ label{
  .addFreind{
   border-radius: 10px;
  }
+ #friendsList{
+  display: flex;
+  flex-direction:column;
+ }
 
+#friendsList button{
+  padding: 10px;
+  background-color:#005C4B;
+  color: white;
+}
 
+#messageInput {
+  width: 100%; /* Adjust width */
+  padding: 10px;
+  margin: 10px 0;
+  border: 2px solid #ddd;
+  border-radius: 20px;
+  outline: none;
+  font-size: 16px;
+  transition: border 0.3s ease-in-out;
+}
+
+#messageInput:focus {
+  border-color: #007bff; /* Highlight on focus */
+}
+
+button {
+  padding: 10px 15px;
+  border: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: background 0.3s ease-in-out;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.navbarButtons {
+  margin-right: 5px; /* Adds spacing between buttons */
+}
+.navbar-nav .nav-item {
+  margin-right: 5px; /* Ensures spacing in navbar */
+}
+.navbar-nav .nav-item:last-child {
+  margin-right: 0; /* Removes extra margin for the last item */
+}
+
+ul{
+  display: flex;
+  gap: 10px;
+}
 
 /* query her  */
 @media (max-width: 940px) {
   .postDiv{
       width: 70%;
+  }
+  .modal-content{
+    width: 65%;
   }
 }
 @media (max-width: 417px) {
@@ -227,5 +286,8 @@ label{
   }
   .navbarButtons{
     font-size: 10px;
+  }
+  .modal-content{
+    width: 80%;
   }
 }

@@ -4,6 +4,7 @@ import {
   addDoc,
   collection,
   getFirestore,
+  orderBy,
   serverTimestamp,
   getDocs,
   getDoc,
@@ -35,6 +36,22 @@ if (!userData) {
   window.location.replace("../../signIn/signIn.html");
 }
 
+let taskMakerDiv = document.querySelector("#taskMakerDiv");
+let postHeading = document.querySelector("#postHeading");
+let postText = document.querySelector("#postText");
+let allPostButton = document.querySelector("#allPostButton");
+let myPostButton = document.querySelector("#myPostButton");
+let newPostButton = document.querySelector("#newPostButton");
+let createNewPostButton = document.querySelector("#createNewPostButton");
+let allPostsDiv = document.querySelector("#allPostsDiv");
+allPostsDiv.style.display = "none";
+let myPostsDiv = document.querySelector("#myPostsDiv");
+myPostsDiv.style.display = "none";
+let mainFormCreateUser = document.querySelector("#mainFormCreateUser");
+mainFormCreateUser.style.display = "none";
+let freindRequests = document.getElementById("freindRequests");
+let chatWithFriends = document.getElementById("chatWithFriends");
+let modalContent = document.querySelector(".modal-content");
 // this is for creating the time for our create new post area
 let getTime = () => {
   let now = new Date();
@@ -88,24 +105,9 @@ let showModal = (message) => {
 
 window.closeModal = () => {
   document.getElementById("popupModal").style.display = "none";
+  modalContent.style.height = "";
 };
 //-----------------modal functions end here----------------
-
-let taskMakerDiv = document.querySelector("#taskMakerDiv");
-let postHeading = document.querySelector("#postHeading");
-let postText = document.querySelector("#postText");
-let allPostButton = document.querySelector("#allPostButton");
-let myPostButton = document.querySelector("#myPostButton");
-let newPostButton = document.querySelector("#newPostButton");
-let createNewPostButton = document.querySelector("#createNewPostButton");
-let allPostsDiv = document.querySelector("#allPostsDiv");
-allPostsDiv.style.display = "none";
-let myPostsDiv = document.querySelector("#myPostsDiv");
-myPostsDiv.style.display = "none";
-let mainFormCreateUser = document.querySelector("#mainFormCreateUser");
-mainFormCreateUser.style.display = "none";
-let freindRequests = document.getElementById("freindRequests");
-let chatWithFriends = document.getElementById("chatWithFriends");
 
 // for creating new post and other stuff
 newPostButton.addEventListener("click", () => {
@@ -877,8 +879,9 @@ async function openChat(friendId, friendName) {
   // Create modal content
   showModal(`<h3>Chat with ${friendName}</h3>
       <div id="chatMessages"></div>
-      <input type="text" id="messageInput" placeholder="Type a message..." />
+      <input type="text" id="messageInput" placeholder="Type a message to ${friendName}" />
       <button id="sendMessageBtn">Send</button>
+      press OK to close the chat.....
   `);
 
   // Start listening for new messages
@@ -896,15 +899,28 @@ function generateChatId(userId1, userId2) {
 
 async function listenForMessages(chatId, friendName) {
   const chatRef = collection(db, "chats", chatId, "messages");
-  onSnapshot(chatRef, (snapshot) => {
+  const queryRef = query(chatRef, orderBy("timestamp", "asc")); // Order by timestamp (old to new)
+
+  onSnapshot(queryRef, (snapshot) => {
     let messagesHtml = "";
     snapshot.forEach((doc) => {
       const message = doc.data();
-      messagesHtml += `<p><strong>${
+      const messageTime = message.timestamp
+        ? new Date(message.timestamp.toMillis()).toLocaleString()
+        : "Just now"; // Convert Firestore timestamp to readable format
+
+      messagesHtml += `<p><small>${messageTime}</small>
+      <br>
+      <strong>${
         message.senderId === userData.id ? "YOU" : friendName
       }:</strong> ${message.text}</p>`;
     });
-    document.getElementById("chatMessages").innerHTML = messagesHtml;
+
+    const chatMessagesDiv = document.getElementById("chatMessages");
+    chatMessagesDiv.innerHTML = messagesHtml;
+
+    // Auto-scroll to the bottom for latest message
+    chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
   });
 }
 
@@ -924,10 +940,12 @@ async function sendMessage(chatId, receiverId) {
 }
 
 // Attach the displayFriendsPosts function to the "chatWithFriends" button in your navbar
+
 chatWithFriends.addEventListener("click", async () => {
   console.log(userData.id);
   myPostsDiv.style.display = "none";
   mainFormCreateUser.style.display = "none";
+  modalContent.style.height = "600px";
   allPostsDiv.style.display = "flex";
 
   // const userId = auth.currentUser?.uid;
