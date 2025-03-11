@@ -198,3 +198,32 @@ document.getElementById("google-login").addEventListener("click", async () => {
     hideLoadingSpinner();
   }
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const background = document.getElementById("background");
+
+  let createBox = () => {
+    const box = document.createElement("div");
+    box.classList.add("box");
+
+    let size = Math.random() * 10 + 10; // Random size between 10px and 20px
+
+    let posX = Math.random() * window.innerWidth;
+    let posY = Math.random() * window.innerHeight;
+    let duration = Math.random() * 4 + 3; // 3s to 7s animation duration
+
+    box.style.width = `${size}px`;
+    box.style.height = `${size}px`;
+    box.style.left = `${posX}px`;
+    box.style.top = `${posY}px`;
+    box.style.animationDuration = `${duration}s`;
+
+    background.appendChild(box);
+
+    setTimeout(() => {
+      box.remove();
+    }, duration * 1000);
+  };
+
+  setInterval(createBox, 300);
+});

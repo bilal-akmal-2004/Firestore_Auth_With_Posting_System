@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <div id="background"></div>
     <form id="mainForm" class="">
       <h1 style="color: white">Register User</h1>
       <div class="form-floating">
@@ -59,45 +60,23 @@
         />
         <label for="floatingPassword">Last Name</label>
       </div>
-      <select
-        id="selectBox"
-        class="form-select"
-        aria-label="Default select example"
-      >
-        <option selected>Select the section</option>
-        <option value="A">A</option>
-        <option value="B">B</option>
-        <option value="C">C</option>
-      </select>
-      <div id="genderDiv">
-        <h3>Gender</h3>
-        <div class="form-check form-check-inline">
-          <input
-            class="form-check-input"
-            type="radio"
-            name="inlineRadioOptions"
-            id="inlineRadio1"
-            value="Male"
-          />
-          <label class="form-check-label" for="inlineRadio1">Male</label>
-        </div>
-        <div class="form-check form-check-inline">
-          <input
-            class="form-check-input"
-            type="radio"
-            name="inlineRadioOptions"
-            id="inlineRadio2"
-            value="Female"
-          />
-          <label class="form-check-label" for="inlineRadio2">Female</label>
-        </div>
-      </div>
 
       <div class="buttonsDiv">
-        <button type="button" id="google-login" class="btn btn-primary">
+        <button
+          style="background-color: #34568f"
+          type="button"
+          id="google-login"
+          class="btn btn-primary"
+        >
           <i class="fa-brands fa-google"></i> Google
         </button>
-        <button type="submit" class="btn btn-primary">Register</button>
+        <button
+          style="background-color: #34568f"
+          type="submit"
+          class="btn btn-primary"
+        >
+          Register
+        </button>
       </div>
       <a href="./signIn/signIn.html">Already have an account ?</a>
     </form>

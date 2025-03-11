@@ -21,61 +21,37 @@
 
   <link rel="stylesheet" href="posts.css" />
   <body>
-    <!-- navbar here -->
+    <div id="background"></div>
+    <!-- navbar  -->
     <div class="navbarMain">
-      <nav class="navbar navbar-expand-lg">
-        <div class="container-fluid">
-          <button class="btn btn-primary navbarButtons" id="allPostButton">
-            All Posts
-          </button>
-          <button
-            class="navbar-toggler"
-            type="button"
-            data-bs-toggle="collapse"
-            data-bs-target="#navbarNav"
-            aria-controls="navbarNav"
-            aria-expanded="false"
-            aria-label="Toggle navigation"
-          >
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav">
-              <li class="nav-item">
-                <button class="btn btn-primary navbarButtons" id="myPostButton">
-                  My Posts
-                </button>
-              </li>
-              <li class="nav-item">
-                <button
-                  class="btn btn-primary navbarButtons"
-                  id="newPostButton"
-                >
-                  Create new post
-                </button>
-              </li>
-              <li class="nav-item">
-                <button
-                  class="btn btn-primary navbarButtons"
-                  id="freindRequests"
-                >
-                  Requests
-                </button>
-              </li>
-              <li class="nav-item">
-                <button
-                  class="btn btn-primary navbarButtons"
-                  id="chatWithFriends"
-                >
-                  Friend's chat area
-                </button>
-              </li>
-            </ul>
-          </div>
-        </div>
+      <nav>
+        <!-- Toggle checkbox (hidden by default on larger screens) -->
+        <input type="checkbox" id="menu-toggle" />
+        <label for="menu-toggle" class="menu-icon">&#9776;</label>
+        <ul class="ulForNavbar">
+          <li>
+            <button class="navbarButtons" id="allPostButton">All Posts</button>
+          </li>
+          <li>
+            <button class="navbarButtons" id="myPostButton">My Posts</button>
+          </li>
+          <li>
+            <button class="navbarButtons" id="newPostButton">
+              Create New Post
+            </button>
+          </li>
+          <li>
+            <button class="navbarButtons" id="freindRequests">Requests</button>
+          </li>
+          <li>
+            <button class="navbarButtons" id="chatWithFriends">
+              Friend's Chat Area
+            </button>
+          </li>
+        </ul>
       </nav>
-      <a href="../home.html">
-        <button class="btn btn-primary navbarButtons">Back</button>
+      <a style="text-decoration: none" href="../home.html">
+        <button class="navbarButtons">Back</button>
       </a>
     </div>
 
@@ -122,7 +98,9 @@
     <div id="popupModal" class="modal">
       <div class="modal-content">
         <p id="modalMessage"></p>
-        <button class="btn btn-primary" onclick="closeModal()">OK</button>
+        <button class="btn btn-primary modalButton" onclick="closeModal()">
+          OK
+        </button>
       </div>
     </div>
 
@@ -165,6 +143,48 @@
         <h2 style="border-bottom: 3px solid #0d6efd">Comments</h2>
         <div id="commentsList"></div>
         <button class="close-modal btn btn-primary">Close</button>
+      </div>
+    </div>
+
+    <!-- off canvas bla bla  -->
+    <!-- Offcanvas Chat Panel -->
+    <div
+      class="offcanvas offcanvas-end"
+      tabindex="-1"
+      id="chatOffcanvas"
+      aria-labelledby="chatOffcanvasLabel"
+    >
+      <div class="offcanvas-header">
+        <h5 id="chatOffcanvasLabel">Chat</h5>
+        <button
+          type="button"
+          class="btn-close text-reset"
+          data-bs-dismiss="offcanvas"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div
+        class="offcanvas-body"
+        id="chatOffcanvasBody"
+        style="overflow-y: auto; max-height: calc(100vh - 150px)"
+      >
+        <!-- Chat messages will load here -->
+      </div>
+      <div class="offcanvas-footer" style="padding: 10px; background: #f8f9fa">
+        <input
+          type="text"
+          id="offcanvasMessageInput"
+          class="form-control"
+          placeholder="Type your message..."
+          style="display: inline-block; width: 80%"
+        />
+        <button
+          class="messageSendButton btn btn-primary"
+          id="offcanvasSendMessageBtn"
+          style="display: inline-block; width: 18%"
+        >
+          Send
+        </button>
       </div>
     </div>
 

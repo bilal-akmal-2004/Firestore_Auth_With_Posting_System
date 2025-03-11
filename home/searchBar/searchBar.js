@@ -98,3 +98,32 @@ const getUser = async () => {
 let searchButton = document.querySelector("#searchButton");
 
 searchButton.addEventListener("click", getUser);
+
+document.addEventListener("DOMContentLoaded", () => {
+  const background = document.getElementById("background");
+
+  function createStar() {
+    const star = document.createElement("div");
+    star.classList.add("star");
+
+    let size = Math.random() * 6 + 5; // Random size between 5px and 11px
+    let posX = Math.random() * window.innerWidth;
+    let posY = Math.random() * window.innerHeight;
+    let duration = Math.random() * 5 + 3; // 3s to 8s animation duration
+    let rotationSpeed = Math.random() * 5 + 2; // 2s to 7s rotation
+
+    star.style.width = `${size}px`;
+    star.style.height = `${size}px`;
+    star.style.left = `${posX}px`;
+    star.style.top = `${posY}px`;
+    star.style.animationDuration = `${duration}s, ${rotationSpeed}s`;
+
+    background.appendChild(star);
+
+    setTimeout(() => {
+      star.remove();
+    }, duration * 1000);
+  }
+
+  setInterval(createStar, 300); // Create stars every 300ms
+});

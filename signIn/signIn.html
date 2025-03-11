@@ -20,6 +20,7 @@
     <link rel="stylesheet" href="signInStyle.css" />
   </head>
   <body>
+    <div id="background"></div>
     <form id="mainForm">
       <h1 style="color: white">Sign In</h1>
       <div class="form-floating">
@@ -41,12 +42,21 @@
         <label for="floatingPassword">Password</label>
       </div>
 
-      <div>
-        <button type="button" id="google-login" class="btn btn-primary">
-          <i class="fa-brands fa-google"></i> Google
-        </button>
-        <button type="submit" class="btn btn-primary">Sign In</button>
-      </div>
+      <button
+        style="background-color: #344b89"
+        type="button"
+        id="google-login"
+        class="btn btn-primary"
+      >
+        <i class="fa-brands fa-google"></i> Google
+      </button>
+      <button
+        style="background-color: #344b89"
+        type="submit"
+        class="btn btn-primary"
+      >
+        Sign In
+      </button>
 
       <a href="../index.html">Create new account !</a>
     </form>

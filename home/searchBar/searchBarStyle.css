@@ -1,81 +1,119 @@
-body{
-    margin: 0px;
-    padding: 0px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    flex-direction: column;
-    text-align: center;
-    background-image: url(../../pics/cover.jpg);
-    color: white;
+/* General Styles */
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+  text-align: center;
+  background: linear-gradient(180deg, #334F67, #334F67, #334F67, #6B6054);
+  font-family: 'Poppins', sans-serif;
+  color: white;
 }
-#backButton{
-    align-self: center;
-}
-.buttonDiv{
-    display: flex;
-    gap: 30px;
-    justify-content: center;
-}
-.mainDiv{
-    border: 2px solid rgb(255, 255, 255);
-    border-radius: 10px;
-    padding: 10px;
-    border-bottom: 20px solid #0b5ed7;
-    display: flex;
-    gap: 10px;
-    flex-direction: column;
-    width: 50%;
-    transition: all 0.5s ease;
-    overflow: hidden;
-}
-.mainDiv:hover{
-  
-    box-shadow: 0px 8px 20px rgba(0, 58, 203, 0.6);
-    background-color: rgba(10, 12, 42, 0.3); /* 50% transparent black */
-    transform: scale(1.02);
-    border-radius: 30px;
 
+/* Main Div */
+.mainDiv {
+  border-radius: 15px;
+  padding: 20px;
+  width: 90%;
+  overflow: hidden;
+  max-width: 450px;
+  background: rgba(255, 255, 255, 0.1);
+  border-bottom: 5px solid #0A4D68;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
-/* Hide the spinner by default */
+
+/* Hover Effect */
+.mainDiv:hover {
+  transform: scale(1.02);
+  box-shadow: 0px 8px 20px rgba(18, 168, 223, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Heading */
+h1 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+/* Input Field (No Focus Effect) */
+.form-floating input {
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 10px;
+  border-radius: 8px;
+  outline: none;
+  width: 100%;
+}
+
+/* Buttons - Full Width & Column Layout */
+.buttonDiv {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+button {
+  background: #0B5ED7;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.3s, transform 0.2s;
+}
+
+button:hover {
+  background: #084298;
+}
+
+/* Loader */
 #loading-spinner {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-  }
-  
-  .spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid rgba(255, 255, 255, 0.3); /* Light border */
-    border-top: 5px solid #fff; /* Highlighted border */
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-  
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
 
-  /* modal css */
-  /* Pop-Up Modal */
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  border-top: 5px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Modal */
 .modal {
   display: none;
   position: fixed;
-  top: 0px;
+  top: 0;
   left: 0;
   width: 100%;
   height: 100%;
@@ -83,22 +121,21 @@ body{
   justify-content: center;
   align-items: center;
   z-index: 10;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 80%;
+  max-width: 400px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: slideDown 0.4s ease;
   color: black;
-  }
-  
-  .modal-content {
-    position: absolute;
-    top: 200px;
-    width: 50%;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    text-align: center;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    animation: slideDown 0.4s ease;
-  }
-  
-  @keyframes slideDown {
+}
+
+@keyframes slideDown {
   from {
     transform: translateY(-50px);
     opacity: 0;
@@ -107,27 +144,82 @@ body{
     transform: translateY(0);
     opacity: 1;
   }
+}
+
+/* Background Container */
+#background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+  background: radial-gradient(ellipse at bottom, #000428, #004e92);
+}
+
+/* Star Animation */
+.star {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  animation: moveStar linear infinite, rotateStar linear infinite;
+}
+
+/* Star Movement */
+@keyframes moveStar {
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(100px) translateX(20px) scale(0.6);
+    opacity: 0;
+  }
+}
+
+/* Star Rotation */
+@keyframes rotateStar {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Star Trail Effect */
+.star::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
+  filter: blur(10px);
+  transform: scaleX(1.5) scaleY(0.5);
+}
+
+
+/* Responsive */
+@media (max-width: 768px) {
+  .mainDiv {
+    width: 80%;
+  }
+}
+
+@media (max-width: 480px) {
+  .mainDiv {
+    width: 95%;
   }
 
-  /* modeal css ends above */
-
-
-  /* media query  */
-  @media (max-width: 649px) {
-    .mainDiv{
-        width: 70%;
-    }
+  .modal-content {
+    width: 90%;
   }
-  @media (max-width: 470px) {
-    .mainDiv{
-        width: 80%;
-    }
-  }
-  @media (max-width: 370px) {
-    h3{
-      font-size: 20px;
-    }
-    .mainDiv{
-        width: 88%;
-    }
-  }
+}

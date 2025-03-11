@@ -1,143 +1,252 @@
-body{
-    margin: 0px;
-    padding: 0px;
-    width: 100%;
-    background-image: url(../../pics/cover.jpg);
+@import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaina+2:wght@400..800&family=Itim&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Overpass:ital,wght@0,100..900;1,100..900&family=Poppins&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Ysabeau+SC:wght@1..1000&display=swap');
+/* General Styles */
+body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(180deg, #1a3039, #213e49, #173b48, #083a4d);
+  font-family: "Baloo Bhaina 2", sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
 }
-.navbarMain{
-  border-radius: 40px;
-    padding: 10px;
-    background-color: #6b7dbed9;
-    display: flex;
-    gap: 10px;
-    width: 100%;
-    align-items: center;
-    position: fixed;
-    justify-content: space-evenly;
-}
-.mainDivForTasks{
-    display: flex;
-    justify-content: center;
-    
-}
-label{
-    font-size: 30px;
-}
-#mainFormCreateUser{
-
-    color: white;
-    margin-top: 63px;}
-#myPostsDiv{
-    
-    color: white;
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    margin-top: 45px;
-}
-#allPostsDiv{
-    
-    color: white;
-    display: flex;
-    justify-content: center;
-    text-align: center;
-    margin-top: 45px;
+/* Navbar Container */
+.navbarMain {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 10px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 10px;
+  z-index: 1000;
 }
 
-/* Hide the spinner by default */
-#loading-spinner {
-    position: fixed;
-    top: 0;
+/* Navbar inside container */
+.navbarMain nav {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  position: relative;
+}
+
+/* Navigation List */
+.navbarMain ul {
+  display: flex;
+  flex: 1;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 10px;
+}
+
+/* Each nav item takes equal space */
+.navbarMain li {
+  flex: 1;
+}
+
+/* Navbar Buttons */
+.navbarButtons {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background-color: #2a9d8f;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.navbarButtons:hover {
+  transition: all 0.5s ease-in-out;
+  background: #058879;
+}
+
+/* Hide the toggle checkbox */
+#menu-toggle {
+  display: none;
+}
+
+/* Hamburger Icon (Toggle Button) */
+.menu-icon {
+  display: none;
+  font-size: 28px;
+  color: white;
+  cursor: pointer;
+  user-select: none;
+  padding: 5px;
+}
+
+/* Media Query: For screens 950px or less */
+@media (max-width: 950px) {
+  /* Show the hamburger icon */
+  .menu-icon {
+    display: block;
+  }
+  
+  /* Hide the menu list by default and display as a vertical column */
+  .navbarMain ul {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    position: absolute;
+    top: 50px; /* Adjust as needed */
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-  }
-  
-  .spinner {
-    width: 50px;
-    height: 50px;
-    border: 5px solid rgba(255, 255, 255, 0.3); /* Light border */
-    border-top: 5px solid #fff; /* Highlighted border */
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-  }
-
-  .like-btn{
+    padding: 10px;
     border-radius: 10px;
-    color: white;
-    background-color: #0a357ea3;
-  }
-  .likeButton-And-Likes{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    
-  @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
+    gap: 10px;
   }
   
-   /* modal css */
-    /* Pop-Up Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0px;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
-      justify-content: center;
-      align-items: center;
-      z-index: 10;
-      }
+  /* When checkbox is checked, show the menu */
+  #menu-toggle:checked ~ ul {
+    display: flex;
+    width: 200px;
+  }
+  
+  /* Make nav items full width */
+  .navbarMain li {
+    flex: none;
+  }
+  
+  
+  /* Ensure the Back button remains visible */
+  .navbarMain > a {
+    align-self: stretch;
+  }
+}
 
-      #modalMessage{
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-      }
-      
-      .modal-content {
-        position: absolute;
-        top: 200px;
-        width: 35%;
-        
-   
-    overflow: scroll;
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        text-align: center;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        animation: slideDown 0.4s ease;
-      }
-      
-      @keyframes slideDown {
-      from {
-        transform: translateY(-50px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-      }
-    
-      /* modeal css ends above */
+/* css for the buttons of my post area   */
+/* delete button  */
+.delete-btn{
+  background-color: #057a7a;
+  border: none;
+}
+.delete-btn:hover{
+  transition: all 1s ease-in-out;
+  background-color: #024D50;
+}
+/* edit btutton */
+.edit-btn {
+  background-color: #02F8C5;
+  border: none;
+}
+.edit-btn:hover{
+  transition: all 1s ease-in-out;
+  background-color: #00CC9B;
+}
 
-      /* Modal for edit Styling */
-#editModal {
+/* create new pos tbutton  */
+#createNewPostButton{
+  border: none;
+  font-weight: bold;
+  color: black;
+  background-color: #02F8C5;
+}
+#createNewPostButton:hover{
+  transition: all 1s ease-in-out;
+  background-color: #04b592;
+}
+
+/* close freind req button modal button  */
+#closeFriendRequestsModal{
+  border: none;
+  background-color: #1b5dc0cf;
+}
+#closeFriendRequestsModal:hover{
+  transition: all 1s ease-in-out;
+  background-color: #126056;
+}
+
+/* Form Styling */
+#mainFormCreateUser {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 20px;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  width: 90%;
+  max-width: 500px;
+  margin-top: 80px;
+}
+
+label {
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+}
+
+input {
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  width: 100%;
+}
+
+button {
+  background: #0b5ed7;
+  border: none;
+  padding: 10px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+  width: 100%;
+}
+
+button:hover {
+  background: #084298;
+}
+
+/* Posts Container */
+#allPostsDiv, #myPostsDiv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 60px;
+  gap: 15px;
+}
+#myPostsDiv{
+  color: white;
+}
+.post-item{
+  text-align: center;
+  margin-top: 20px;
+}
+
+#friendRequestsModal{
+  border-radius: 20px;
+}
+
+/* Name & Time Section */
+.nameAndTime {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 2px solid white;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+/* Like & Comment Section */
+.likeButton-And-Likes {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Modals */
+.modal {
   display: none;
   position: fixed;
   top: 0;
@@ -147,147 +256,363 @@ label{
   background: rgba(0, 0, 0, 0.7);
   justify-content: center;
   align-items: center;
-  z-index: 10;
 }
 
-#editModal .modal-content {
-  background: white;
+.modalButton{
+  background-color: #037579;
+  border: none;
+}
+.modalButton:hover{
+  transition: all 1s ease-in-out;
+  background-color: #003c3ec7;
+  border: none;
+}
+
+
+.modal-content {
+  display: flex;
   gap: 10px;
+  background: white;
   padding: 20px;
-  height: 300px;
   border-radius: 10px;
   text-align: center;
+  width: 80%;
+  max-width: 400px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  animation: slideDown 0.4s ease;
 }
-
-.post-item {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 15px;
-  margin: 10px 0;
-  border-radius: 5px;
-}
-
-.post-item button {
-  margin: 5px;
-}
- /* Modal for edit Styling ends above*/
-
- .nameAndTime{
-  border: 3px solid white;
-    border-radius: 10px;
-    padding: 4px;
-    margin-top: 4px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
- }
- #allPostsDiv{
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
- }
-
- .postDiv{
-  width: 50%;
-  border: 1px solid white;
-  border-radius: 6px;
-  border-bottom: 8px solid white;
-  padding: 10px;
- }
-
- .displayLikesAndLikedBy{
-      display: flex;
-      flex-direction: row-reverse;
-      gap: 10px;
-      align-items: center;
- }
-
- .likedByButton{
-  padding: 0px;
+/* Post Container */
+.postDiv {
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 10px;
-  background-color: #0c2d62b3;
-  color: white;
- }
+  padding: 20px;
+  margin: 15px auto;
+  min-width: 600px;
+  max-width: 600px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
 
- #likedByModal{
-  border-radius: 30px;
- }
+/* Hover Effect for Post */
+.postDiv:hover {
+  transform: scale(1.02);
+}
 
- .addFreind{
-  border-radius: 10px;
- }
- #friendsList{
+/* Name and Time Section */
+.nameAndTime {
   display: flex;
-  flex-direction:column;
- }
-
-#friendsList button{
-  padding: 10px;
-  background-color:#005C4B;
-  color: white;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.4);
 }
 
-#messageInput {
-  width: 100%; /* Adjust width */
-  padding: 10px;
-  margin: 10px 0;
-  border: 2px solid #ddd;
-  border-radius: 20px;
-  outline: none;
-  font-size: 16px;
-  transition: border 0.3s ease-in-out;
+/* Name and Time Headings */
+.nameAndTime h6 {
+  font-size: 14px;
+  margin: 0;
+  color: #ddd;
+  display: flex;
+  gap: 5px;
 }
 
-#messageInput:focus {
-  border-color: #007bff; /* Highlight on focus */
-}
-
-button {
-  padding: 10px 15px;
-  border: none;
-  background-color: #007bff;
-  color: white;
-  border-radius: 20px;
+/* "Add Friend" Button in NameAndTime */
+.addFreind {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 40%;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  padding: 5px;
   cursor: pointer;
-  transition: background 0.3s ease-in-out;
+  transition: background 0.3s;
 }
 
-button:hover {
-  background-color: #0056b3;
+.addFreind:hover {
+  background: rgba(255, 255, 255, 0.3);
 }
 
-.navbarButtons {
-  margin-right: 5px; /* Adds spacing between buttons */
-}
-.navbar-nav .nav-item {
-  margin-right: 5px; /* Ensures spacing in navbar */
-}
-.navbar-nav .nav-item:last-child {
-  margin-right: 0; /* Removes extra margin for the last item */
+/* Post Headings */
+.postDiv h1 {
+  font-size: 24px;
+  margin: 10px 0;
+  color: #fff;
 }
 
-ul{
+.postDiv h3 {
+  font-size: 18px;
+  margin: 10px 0;
+  color: #eee;
+}
+
+/* Like and Likes Section */
+.likeButton-And-Likes {
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 15px;
+}
+
+/* Like Button Style */
+.like-btn {
+  background-color: #ffffff3d;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s, transform 0.2s;
+  flex: 1;
+  margin-right: 10px;
+}
+
+.like-btn:hover {
+  background: #a58f8f7b;
+  transform: scale(1.03);
+}
+
+/* Liked-By Container */
+.displayLikesAndLikedBy {
+  display: flex;
+  align-items: center;
   gap: 10px;
 }
 
-/* query her  */
-@media (max-width: 940px) {
-  .postDiv{
-      width: 70%;
+/* Liked-By Button */
+.likedByButton {
+  background: #588de368;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.likedByButton:hover {
+  background: #4c83dcbc;
+}
+
+/* Likes Count */
+.displayLikesAndLikedBy h4 {
+  margin: 0;
+  font-size: 16px;
+  color: #fff;
+}
+
+/* Comment Buttons Container */
+.comment-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+/* Comment Button Styles (Override Bootstrap if needed) */
+.comment-buttons .btn {
+  background-color: #32acb096;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  padding: 10px;
+  cursor: pointer;
+  width: 100%;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.comment-buttons .btn:hover {
+  transition: all 0.5s ease-in-out;
+
+  background: #0c818596;
+}
+
+/* Background Animation */
+#background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.box {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid #ffffff61;
+  box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+  border-radius: 3px;
+  animation: floatBox linear infinite;
+}
+
+@keyframes floatBox {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 1;
   }
-  .modal-content{
-    width: 65%;
+  50% {
+    transform: scale(1.5) rotate(180deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(0) rotate(360deg);
+    opacity: 0;
   }
 }
-@media (max-width: 417px) {
-  .postDiv{
-      width: 86%;
+
+#likedByModal{
+  border-radius: 20px;
+}
+
+/* freinds req modal  */
+.friendRequestModal{
+  padding: 20px;
+    border-radius: 10px;
+    background: white;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+
+}
+
+.friendRequestModal li{
+  display: flex;
+  align-items: center;
+  width: 250px;
+  justify-content: space-around;
+}
+
+.friendRequestModal button{    
+  width: 34%;
+}
+
+/* modal show firends  */
+.showFreindsModalInnerDiv{
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.showFreindsModalInnerDiv h3{
+  height: 17px;
+}
+
+.showFreindsModalInnerDiv button{
+  background-color: #198754;
+  padding: 4px 1px;
+  border-radius: 20px;
+    width: 25%;
+}
+
+/* Loader */
+#loading-spinner {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255, 255, 255, 0.3);
+  border-top: 5px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* all post heading css  */
+.allPostHeading{
+  text-align: center;
+  padding: 10px;
+  color: #ffffff;
+  font-size: 25px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
   }
-  .navbarButtons{
-    font-size: 10px;
-  }
-  .modal-content{
-    width: 80%;
+  to {
+    transform: rotate(360deg);
   }
 }
+
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+  .postDiv {
+    width: 95%;
+    padding: 15px;
+  }
+  .postDiv h1 {
+    font-size: 20px;
+  }
+  .postDiv h3 {
+    font-size: 16px;
+  }
+  .nameAndTime h6 {
+    font-size: 12px;
+  }
+  .like-btn,
+  .likedByButton {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  .displayLikesAndLikedBy h4 {
+    font-size: 14px;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .postDiv, #mainFormCreateUser {
+    width: 95%;
+  }
+}
+@media (max-width: 633px) {
+  .postDiv{
+  min-width: 500px;
+  max-width: 500px;
+  }
+}
+@media (max-width: 528px) {
+  .postDiv{
+  min-width: 400px;
+  max-width: 400px;
+  }
+}
+ @media (max-width: 412px) {
+  .postDiv{
+  min-width: 370px;
+  max-width: 370px;
+  }
+}
+@media (max-width: 380px) {
+  .postDiv{
+  min-width: 300px;
+  max-width: 300px;
+  }
+}
+
+

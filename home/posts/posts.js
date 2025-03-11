@@ -174,11 +174,11 @@ onSnapshot(q, (querySnapshot) => {
 // Function to display My Posts from cache
 let showMyPosts = () => {
   try {
-    myPostsDiv.innerHTML = `<h1 style="font-size: 65px; text-decoration: underline;">My Posts</h1>`;
+    myPostsDiv.innerHTML = `<h1 style="padding: 10px; font-size: 25px;text-align: center;">My Posts</h1>`;
 
     mySavedPosts.forEach((post) => {
       myPostsDiv.innerHTML += `
-        <div class="post-item">
+        <div style="text-align:center;" class="postDiv">
           <h2>${post.postHeading}</h2>
           <p>${post.postText}</p>
           <h6>Created: ${post.updatedTime || post.createdTime} ${
@@ -345,7 +345,7 @@ const likeButton = async (postUID) => {
 
 // ✅ Function to Display Posts
 const displayPosts = () => {
-  allPostsDiv.innerHTML = `<h1 style="color: skyblue; font-size: 65px; text-decoration: underline; text-transform: uppercase;">All Posts</h1>`;
+  allPostsDiv.innerHTML = `<h1 class="allPostHeading">All Posts</h1>`;
 
   savedPosts.forEach((post, index) => {
     allPostsDiv.insertAdjacentHTML(
@@ -700,9 +700,9 @@ const showFriendRequests = async () => {
         let modal = document.createElement("dialog");
         modal.setAttribute("id", "friendRequestsModal");
         modal.innerHTML = `
-          <div style="padding:20px; border-radius:10px; background:white; box-shadow: 0px 4px 6px rgba(0,0,0,0.1); text-align:center;">
+          <div class="friendRequestModal"">
             <h2>Friend Requests</h2>
-            ${requestsHtml}
+            <h5>${requestsHtml}</h5>
             <button id="closeFriendRequestsModal" class="btn btn-primary">Close</button>
           </div>
         `;
@@ -734,7 +734,9 @@ const showFriendRequests = async () => {
     console.error("Error fetching friend requests:", error);
     showModal("Error fetching friend requests");
   } finally {
-    hideLoadingSpinner();
+    setTimeout(() => {
+      hideLoadingSpinner();
+    }, 500);
   }
 };
 
@@ -763,70 +765,9 @@ const acceptFriendRequest = async (friendUID) => {
 
 // Attach the function to the "freindRequests" button in your navbar
 freindRequests.addEventListener("click", () => {
-  myPostsDiv.style.display = "none";
-  mainFormCreateUser.style.display = "none";
-  allPostsDiv.style.display = "flex";
   showFriendRequests();
 });
 
-// // Function to display only friends' posts
-// const displayFriendsPosts = async () => {
-//   try {
-//     console.log("displayFriendsPosts: Starting function.");
-//     showLoadingSpinner();
-
-//     // 1. Get the current user's document from the "Users" collection.
-//     // (Change "Users" to "users" if needed.)
-//     const currentUserDocRef = doc(db, "Users", userData.id);
-//     const currentUserDocSnap = await getDoc(currentUserDocRef);
-
-//     if (!currentUserDocSnap.exists()) {
-//       console.error("Current user document not found.");
-//       showModal("User document not found.");
-//       return;
-//     }
-
-//     const currentUserData = currentUserDocSnap.data();
-//     const friendsArray = currentUserData.friends || [];
-//     console.log("displayFriendsPosts: Friends array:", friendsArray);
-
-//     if (friendsArray.length === 0) {
-//       showModal("You have no friends added.");
-//       return;
-//     }
-
-//     // 2. Query posts where the "id" field (owner's UID) is in the friends array.
-//     // Note: The "in" operator accepts up to 10 values. If your friends list is longer, you'll need to batch queries.
-//     const friendsPostsQuery = query(
-//       collection(db, "posts"),
-//       where("id", "in", friendsArray)
-//     );
-//     console.log("displayFriendsPosts: Running query with friendsArray.");
-
-//     const querySnapshot = await getDocs(friendsPostsQuery);
-//     console.log(
-//       "displayFriendsPosts: Query snapshot size:",
-//       querySnapshot.size
-//     );
-
-//     const friendsPosts = querySnapshot.docs.map((doc) => ({
-//       postUID: doc.id,
-//       ...doc.data(),
-//     }));
-//     console.log("displayFriendsPosts: Friends posts fetched:", friendsPosts);
-
-//     // 3. Display these posts using a dedicated UI function.
-//     displayFriendsPostsUI(friendsPosts);
-//   } catch (error) {
-//     console.error("Error fetching friend's posts:", error);
-//     showModal("Error fetching friend's posts.");
-//   } finally {
-//     console.log("displayFriendsPosts: Hiding spinner.");
-//     hideLoadingSpinner();
-//   }
-// };
-
-// FIRENDS FOR THATA CAHTTING SYSTME
 async function showFriendsModal(friendsList) {
   showLoadingSpinner();
   let modalContent = "<h3>Your Friends</h3><div id='friendsList'></div>";
@@ -853,16 +794,25 @@ async function showFriendsModal(friendsList) {
         const friendName = friendSnap.data().firstName || "Unknown User";
         const friendId = friendsList[index];
 
+        // Create button div
+        const div = document.createElement("div");
+        div.className = "showFreindsModalInnerDiv";
+
         // Create button element
         const button = document.createElement("button");
-        button.textContent = `Chat with ${friendName}`;
-        button.style.borderRadius = "20px";
+        button.textContent = `Chat 💬`;
+
+        // Create button element
+        const h3 = document.createElement("h3");
+        h3.textContent = ` ${friendName}`;
 
         // Attach event listener correctly
         button.addEventListener("click", () => openChat(friendId, friendName));
 
         // Append button to the modal
-        friendsListContainer.appendChild(button);
+        div.appendChild(h3);
+        div.appendChild(button);
+        friendsListContainer.appendChild(div);
         friendsListContainer.appendChild(document.createElement("br"));
       }
     });
@@ -874,32 +824,43 @@ async function showFriendsModal(friendsList) {
 }
 
 async function openChat(friendId, friendName) {
+  closeModal();
   const chatId = generateChatId(userData.id, friendId);
 
-  // Create modal content
-  showModal(`<h3>Chat with ${friendName}</h3>
-      <div id="chatMessages"></div>
-      <input type="text" id="messageInput" placeholder="Type a message to ${friendName}" />
-      <button id="sendMessageBtn">Send</button>
-      press OK to close the chat.....
-  `);
+  // Set the offcanvas header to show friend's name
+  document.getElementById(
+    "chatOffcanvasLabel"
+  ).innerText = `Chat with ${friendName}`;
 
-  // Start listening for new messages
-  listenForMessages(chatId, friendName);
+  // Clear any previous messages from the offcanvas body
+  document.getElementById("chatOffcanvasBody").innerHTML = "";
 
-  // Attach event listener to the send button after the modal is shown
-  document.getElementById("sendMessageBtn").addEventListener("click", () => {
-    sendMessage(chatId, friendId);
-  });
+  // Show the offcanvas panel using Bootstrap's Offcanvas API
+  const offcanvasEl = document.getElementById("chatOffcanvas");
+  const bsOffcanvas = new bootstrap.Offcanvas(offcanvasEl);
+  bsOffcanvas.show();
+
+  // Start listening for new messages; messages will be loaded into the offcanvas body
+  listenForMessages(chatId, friendName, "chatOffcanvasBody");
+
+  // Attach event listener to the Send button in the offcanvas
+  const sendBtn = document.getElementById("offcanvasSendMessageBtn");
+  sendBtn.onclick = function () {
+    sendMessage(chatId, friendId, "offcanvasMessageInput");
+  };
 }
 
 function generateChatId(userId1, userId2) {
   return userId1 < userId2 ? `${userId1}_${userId2}` : `${userId2}_${userId1}`;
 }
 
-async function listenForMessages(chatId, friendName) {
+async function listenForMessages(
+  chatId,
+  friendName,
+  containerId = "chatMessages"
+) {
   const chatRef = collection(db, "chats", chatId, "messages");
-  const queryRef = query(chatRef, orderBy("timestamp", "asc")); // Order by timestamp (old to new)
+  const queryRef = query(chatRef, orderBy("timestamp", "asc")); // Order messages from oldest to newest
 
   onSnapshot(queryRef, (snapshot) => {
     let messagesHtml = "";
@@ -907,25 +868,20 @@ async function listenForMessages(chatId, friendName) {
       const message = doc.data();
       const messageTime = message.timestamp
         ? new Date(message.timestamp.toMillis()).toLocaleString()
-        : "Just now"; // Convert Firestore timestamp to readable format
-
-      messagesHtml += `<p><small>${messageTime}</small>
-      <br>
-      <strong>${
-        message.senderId === userData.id ? "YOU" : friendName
-      }:</strong> ${message.text}</p>`;
+        : "Just now";
+      messagesHtml += `<p><small>${messageTime}</small><br>
+        <strong>${
+          message.senderId === userData.id ? "YOU" : friendName
+        }:</strong> ${message.text}</p>`;
     });
-
-    const chatMessagesDiv = document.getElementById("chatMessages");
-    chatMessagesDiv.innerHTML = messagesHtml;
-
-    // Auto-scroll to the bottom for latest message
-    chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
+    const container = document.getElementById(containerId);
+    container.innerHTML = messagesHtml;
+    container.scrollTop = container.scrollHeight;
   });
 }
 
-async function sendMessage(chatId, receiverId) {
-  const messageInput = document.getElementById("messageInput");
+async function sendMessage(chatId, receiverId, inputFieldId = "messageInput") {
+  const messageInput = document.getElementById(inputFieldId);
   if (!messageInput.value.trim()) return;
 
   const chatRef = collection(db, "chats", chatId, "messages");
@@ -943,10 +899,6 @@ async function sendMessage(chatId, receiverId) {
 
 chatWithFriends.addEventListener("click", async () => {
   console.log(userData.id);
-  myPostsDiv.style.display = "none";
-  mainFormCreateUser.style.display = "none";
-  modalContent.style.height = "600px";
-  allPostsDiv.style.display = "flex";
 
   // const userId = auth.currentUser?.uid;
   // if (!userId) return showModal("Please log in first!");
@@ -963,3 +915,58 @@ chatWithFriends.addEventListener("click", async () => {
   console.log(friendsList);
   showFriendsModal(friendsList);
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const background = document.getElementById("background");
+
+  let createBox = () => {
+    const box = document.createElement("div");
+    box.classList.add("box");
+
+    let size = Math.random() * 10 + 10; // Random size between 10px and 20px
+
+    let posX = Math.random() * window.innerWidth;
+    let posY = Math.random() * window.innerHeight;
+    let duration = Math.random() * 4 + 3; // 3s to 7s animation duration
+
+    box.style.width = `${size}px`;
+    box.style.height = `${size}px`;
+    box.style.left = `${posX}px`;
+    box.style.top = `${posY}px`;
+    box.style.animationDuration = `${duration}s`;
+
+    background.appendChild(box);
+
+    setTimeout(() => {
+      box.remove();
+    }, duration * 1000);
+  };
+
+  setInterval(createBox, 300);
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+  const menuToggle = document.getElementById("menu-toggle");
+  const menu = document.querySelector(".navbarMain ul");
+  const hamburger = document.querySelector(".menu-icon");
+
+  // When hamburger is clicked, if menu is open, add a one-time listener on the document
+  hamburger.addEventListener("click", function () {
+    // Use a short timeout so that the checkbox state updates first
+    setTimeout(() => {
+      if (menuToggle.checked) {
+        // Attach a one-time event listener to close the menu on outside click
+        document.addEventListener("click", function handler(event) {
+          // If click is outside the menu and hamburger, close the menu
+          if (!menu.contains(event.target) && event.target !== hamburger) {
+            menuToggle.checked = false;
+            document.removeEventListener("click", handler);
+          }
+        });
+      }
+    }, 0);
+  });
+});
+
+allPostsDiv.style.display = "flex";
+getAllPosts();

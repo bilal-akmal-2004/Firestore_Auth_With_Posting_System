@@ -36,9 +36,6 @@ let passwordInp = document.querySelector("#passwordInp");
 let fnameInp = document.querySelector("#fnameInp");
 let lnameInp = document.querySelector("#lnameInp");
 let mainForm = document.querySelector("#mainForm");
-let selectBox = document.querySelector("#selectBox");
-let inlineRadio1 = document.querySelector("#inlineRadio1");
-let inlineRadio2 = document.querySelector("#inlineRadio2");
 
 let loadingSpinner = document.getElementById("loading-spinner");
 
@@ -118,9 +115,7 @@ let registerData = async (event) => {
     !emailInp.value ||
     !passwordInp.value ||
     !fnameInp.value ||
-    !lnameInp.value ||
-    selectBox.value === "Select the section" ||
-    (!inlineRadio1.checked && !inlineRadio2.checked)
+    !lnameInp.value
   ) {
     showModal("Make sure to fill all the fields.");
     return;
@@ -144,8 +139,6 @@ let registerData = async (event) => {
       firstName: fnameInp.value,
       lastName: lnameInp.value,
       email: emailInp.value,
-      section: selectBox.value,
-      gender: radioValue(),
       friendRequests: [],
       friends: [],
     });
@@ -160,8 +153,6 @@ let registerData = async (event) => {
           id: uid,
           email: emailInp.value,
           userName: `${fnameInp.value} ${lnameInp.value}`,
-          section: selectBox.value,
-          gender: radioValue(),
         })
       );
     }
@@ -231,4 +222,31 @@ document.getElementById("google-login").addEventListener("click", async () => {
   } finally {
     hideLoadingSpinner();
   }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const background = document.getElementById("background");
+
+  function createBox() {
+    const box = document.createElement("div");
+    box.classList.add("box");
+    let size = Math.random() * 8 + 5; // Random size between 5px and 13px
+    let posX = Math.random() * window.innerWidth;
+    let posY = Math.random() * window.innerHeight;
+    let duration = Math.random() * 5 + 3; // 3s to 8s animation duration
+
+    box.style.width = `${size}px`;
+    box.style.height = `${size}px`;
+    box.style.left = `${posX}px`;
+    box.style.top = `${posY}px`;
+    box.style.animationDuration = `${duration}s`;
+
+    background.appendChild(box);
+
+    setTimeout(() => {
+      box.remove();
+    }, duration * 1000);
+  }
+
+  setInterval(createBox, 500);
 });

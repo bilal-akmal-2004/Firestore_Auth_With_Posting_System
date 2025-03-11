@@ -72,22 +72,9 @@ if (userData) {
 
     // if (userSnap.exists()) {
     //   const userFromDb = userSnap.data();
-
-    if (userData.section === undefined) {
-      message.innerText = `Welcome !
-          Name: ${userData.userName}
-          Email: ${userData.email}
-          Id: ${userData.id}
+    message.innerText = `Welcome !
+     ${userData.userName}
           `;
-    } else {
-      message.innerText = `Welcome !
-          Name: ${userData.userName}
-          Email: ${userData.email}
-          Id: ${userData.id}
-          Section: ${userData.section}
-          Gender: ${userData.gender}
-          `;
-    }
     // } else {
     //   console.log("No user data found in Firestore for UID:", userData.id);
     //   window.location.replace("../signIn/signIn.html");
@@ -197,4 +184,31 @@ logOut.addEventListener("click", async () => {
     // Notify the user of the issue
     showModal("An error occurred during logout. Please try again.");
   }
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+  const background = document.getElementById("background");
+
+  function createBox() {
+    const box = document.createElement("div");
+    box.classList.add("box");
+    let size = Math.random() * 8 + 5; // Random size between 5px and 13px
+    let posX = Math.random() * window.innerWidth;
+    let posY = Math.random() * window.innerHeight;
+    let duration = Math.random() * 5 + 3; // 3s to 8s animation duration
+
+    box.style.width = size + "px"; // Fix: Use string concatenation
+    box.style.height = size + "px";
+    box.style.left = posX + "px";
+    box.style.top = posY + "px";
+    box.style.animationDuration = duration + "s";
+
+    background.appendChild(box);
+
+    setTimeout(() => {
+      box.remove();
+    }, duration * 1000);
+  }
+
+  setInterval(createBox, 500);
 });
