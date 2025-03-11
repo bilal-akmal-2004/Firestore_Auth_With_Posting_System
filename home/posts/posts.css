@@ -478,6 +478,12 @@ button:hover {
 
 }
 
+.friendRequestModal ul{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .friendRequestModal li{
   display: flex;
   align-items: center;

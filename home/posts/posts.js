@@ -473,49 +473,55 @@ const sendFriendRequest = async (recipientUID) => {
   }
 };
 
-const openLikedByModal = (postUID) => {
+const openLikedByModal = async (postUID) => {
   const post = savedPosts.find((p) => p.postUID === postUID);
 
-  if (!post || post.likedBy.length === 0) {
+  if (!post || !post.likedBy || post.likedBy.length === 0) {
     showModal("No likes yet!");
     return;
   }
 
-  // 🔄 Create a fresh user lookup map each time (to stay updated)
-  const userMap = {};
-  savedPosts.forEach((p) => {
-    userMap[p.id] = p.name; // Map user UID to name
-  });
+  try {
+    // Fetch details for each user in the likedBy array
+    const likedUserPromises = post.likedBy.map(async (userUID) => {
+      const userDocSnap = await getDoc(doc(db, "Users", userUID));
+      if (userDocSnap.exists()) {
+        const data = userDocSnap.data();
+        // Combine first and last names if available
+        return data.firstName + (data.lastName ? " " + data.lastName : "");
+      }
+      return "Unknown User";
+    });
 
-  // Find names of users who liked the post
-  const likedUserNames = post.likedBy
-    .map((userUID) => userMap[userUID] || "Unknown User")
-    .filter((name) => name !== "Unknown User");
+    const likedUserNames = await Promise.all(likedUserPromises);
 
-  // Create modal dynamically
-  let modal = document.createElement("dialog");
-  modal.setAttribute("id", "likedByModal");
-  modal.innerHTML = `
-    <div style="text-align: center; padding: 20px; border-radius: 10px; background: white; box-shadow: 0px 4px 6px rgba(0,0,0,0.1);">
-      <h2>Liked By:</h2>
-      <ul>${
-        likedUserNames.map((name) => `<li>${name}</li>`).join("") ||
-        "<li>No users found</li>"
-      }</ul>
-      <button class="btn btn-primary" id="closeLikedByModal">Close</button>
-    </div>
-  `;
+    // Build modal content
+    let modal = document.createElement("dialog");
+    modal.setAttribute("id", "likedByModal");
+    modal.innerHTML = `
+      <div style="text-align: center; padding: 20px; border-radius: 10px; background: white; box-shadow: 0px 4px 6px rgba(0,0,0,0.1);">
+        <h2>Liked By:</h2>
+        <ul>
+          ${likedUserNames.map((name) => `<li>${name}</li>`).join("")}
+        </ul>
+        <button class="btn btn-primary" id="closeLikedByModal">Close</button>
+      </div>
+    `;
 
-  document.body.appendChild(modal);
+    document.body.appendChild(modal);
+    modal.showModal();
 
-  // Show the modal
-  modal.showModal();
-
-  // Close button functionality
-  document.getElementById("closeLikedByModal").addEventListener("click", () => {
-    modal.close();
-    modal.remove();
-  });
+    // Close button functionality
+    document
+      .getElementById("closeLikedByModal")
+      .addEventListener("click", () => {
+        modal.close();
+        modal.remove();
+      });
+  } catch (error) {
+    console.error("Error fetching liked users:", error);
+    showModal("Error fetching liked users");
+  }
 };
 
 // ✅ Function to Open Add Comment Modal
