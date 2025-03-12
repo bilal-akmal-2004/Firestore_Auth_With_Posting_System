@@ -1,5 +1,4 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
-
 import {
   addDoc,
   collection,
@@ -18,18 +17,43 @@ import {
   updateDoc,
 } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
-//  Initialize Firebase
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  uploadBytes,
+  getDownloadURL,
+} from "https://www.gstatic.com/firebasejs/11.2.0/firebase-storage.js"; // 🔄 Updated to match the correct version
+
+// 1️⃣ Initialize Firebase for Firestore & Authentication
 const firebaseConfig = {
   apiKey: "AIzaSyDfgK34boUe0T77KFpteYvMRCYJ-aXOjqc",
   authDomain: "verysimpleuserform.firebaseapp.com",
   projectId: "verysimpleuserform",
-  storageBucket: "verysimpleuserform.firebasestorage.app",
+  storageBucket: "verysimpleuserform.appspot.com",
   messagingSenderId: "712556880799",
   appId: "1:712556880799:web:c9ae8ce0632ae17b68d3aa",
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// 2️⃣ Initialize Firebase for Storage (Separate Project)
+const firebaseStorageConfig = {
+  apiKey: "AIzaSyB3-XCcQY4HSnksvDIf2a7rxJvVr7lA4E0",
+  authDomain: "app-development-assignment-1.firebaseapp.com",
+  projectId: "app-development-assignment-1",
+  storageBucket: "app-development-assignment-1.appspot.com",
+  messagingSenderId: "1063054144697",
+  appId: "1:1063054144697:web:c9c3f68dcce4973484fd768",
+};
+
+// 🔥 Initialize the second Firebase project with a different name
+const storageApp = initializeApp(firebaseStorageConfig, "storageApp");
+
+// ✅ Ensure getStorage is using `storageApp`
+const storage = getStorage(storageApp);
+
 //  Redirect if user is not logged in
 let userData = JSON.parse(localStorage.getItem("userData"));
 if (!userData) {
@@ -118,9 +142,27 @@ newPostButton.addEventListener("click", () => {
 
 let createNewPost = async () => {
   let currenttime = getTime();
+  let imageFile = document.getElementById("postImage").files[0];
+
+  // 🔴 Check if required fields are empty
+  if (!postHeading.value.trim() || !postText.value.trim() || !imageFile) {
+    showModal("Fill the fields first.");
+    return;
+  }
 
   try {
     showLoadingSpinner();
+    let imageURL = null; // Default if no image is uploaded
+
+    // ✅ Upload image if selected
+    if (imageFile) {
+      const uniqueImageName = `${Date.now()}_${imageFile.name}`; // Unique name to avoid overwrites
+      const imageRef = ref(storage, `postsPictures/${uniqueImageName}`);
+      await uploadBytes(imageRef, imageFile);
+      imageURL = await getDownloadURL(imageRef);
+    }
+
+    // ✅ Save post in Firestore
     const docRef = await addDoc(collection(db, "posts"), {
       postHeading: postHeading.value,
       postText: postText.value,
@@ -129,18 +171,26 @@ let createNewPost = async () => {
       createdTime: currenttime,
       likedBy: [],
       comments: [],
+      imageUrl: imageURL, // 🖼️ Store image URL (null if no image)
     });
+
     console.log("Document written with ID: ", docRef.id);
+
+    // ✅ Clear form fields
     postHeading.value = ``;
     postText.value = ``;
-    showModal("New post created succesfully!");
+    document.getElementById("postImage").value = ``;
+
+    showModal("New post created successfully!");
   } catch (error) {
-    console.error(error);
+    console.error("Error creating post: ", error);
   } finally {
     hideLoadingSpinner();
   }
 };
+// ✅ Attach event listener
 createNewPostButton.addEventListener("click", createNewPost);
+
 // for creating new post and other stuff ends above-----------------------------------------
 
 // for showing all of my post here is the functuons for that
@@ -163,11 +213,12 @@ onSnapshot(q, (querySnapshot) => {
       postId: post.id, // Ensure correct ID is stored
       createdTime: postData.createdTime,
       updatedTime: postData.updatedTime,
+      imageUrl: postData.imageUrl || null, // Include image URL (null if no image)
     });
   });
 
   console.log("Updated Posts:", mySavedPosts);
-  //  Update UI automatically when Firestore changes
+  // Update UI automatically when Firestore changes
   showMyPosts();
 });
 
@@ -181,17 +232,26 @@ let showMyPosts = () => {
         <div style="text-align:center;" class="postDiv">
           <h2>${post.postHeading}</h2>
           <p>${post.postText}</p>
-          <h6>Created: ${post.updatedTime || post.createdTime} ${
+          ${
+            post.imageUrl
+              ? `<img src="${post.imageUrl}" alt="Post Image" style="max-width: 100%; height: auto; margin-top: 10px; border-radius: 10px;">`
+              : ""
+          }
+          <h6 class="mt-3">Created: ${post.updatedTime || post.createdTime} ${
         post.updatedTime ? "(Updated)" : ""
       }</h6>
-          <button class="btn btn-danger delete-btn w-25" data-id="${
-            post.postId
-          }">Delete</button>
+      
+<div>
+<button class="btn btn-danger delete-btn w-25" data-id="${
+        post.postId
+      }">Delete</button>
           <button class="btn btn-warning edit-btn w-25" data-id="${
             post.postId
           }" data-heading="${post.postHeading}" data-text="${
         post.postText
-      }">Edit</button>
+      }" data-image="${post.imageUrl || ""}">Edit</button>
+      </div>
+          
         </div>
       `;
     });
@@ -209,7 +269,8 @@ let showMyPosts = () => {
         let postId = event.target.getAttribute("data-id");
         let postHeading = event.target.getAttribute("data-heading");
         let postText = event.target.getAttribute("data-text");
-        openEditModal(postId, postHeading, postText);
+        let postImage = event.target.getAttribute("data-image");
+        openEditModal(postId, postHeading, postText, postImage);
       });
     });
   } catch (error) {
@@ -232,11 +293,24 @@ let deletePost = async (postId) => {
   }
 };
 
-// Open Edit Modal
-let openEditModal = (postId, postHeading, postText) => {
+// Open Edit Modal (Now includes Image)
+let openEditModal = (postId, postHeading, postText, postImage) => {
   document.getElementById("editPostHeading").value = postHeading;
   document.getElementById("editPostText").value = postText;
   document.getElementById("updatePostButton").setAttribute("data-id", postId);
+
+  let editImagePreview = document.getElementById("editImagePreview");
+
+  if (postImage && postImage !== "undefined") {
+    editImagePreview.src = postImage;
+    editImagePreview.style.display = "block";
+  } else {
+    editImagePreview.style.display = "none";
+  }
+
+  // Clear previous file selection
+  document.getElementById("editPostImage").value = "";
+
   document.getElementById("editModal").style.display = "flex";
 };
 
@@ -249,25 +323,66 @@ window.closeEditModal = () => {
 let updatePost = async () => {
   let currenttime = getTime();
   try {
-    showLoadingSpinner();
+    showLoadingSpinner(); // Start loading
+    await new Promise((resolve) => setTimeout(resolve, 100)); // ✅ Allow UI update
+
     let postId = document
       .getElementById("updatePostButton")
       .getAttribute("data-id");
     let updatedHeading = document.getElementById("editPostHeading").value;
     let updatedText = document.getElementById("editPostText").value;
+    let newImageFile = document.getElementById("editPostImage").files[0];
 
-    await updateDoc(doc(db, "posts", postId), {
+    let updatedData = {
       postHeading: updatedHeading,
       postText: updatedText,
       updatedTime: currenttime,
-    });
+    };
 
-    showModal("Post updated successfully!");
-    closeEditModal();
+    // ✅ Handle image upload properly
+    if (newImageFile) {
+      let storageRef = ref(
+        storage,
+        `postImages/${postId}-${newImageFile.name}`
+      );
+
+      // Start image upload and show progress
+      let uploadTask = uploadBytesResumable(storageRef, newImageFile);
+
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          let progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload Progress:", progress + "%");
+        },
+        (error) => {
+          console.error("Upload Error:", error);
+        },
+        async () => {
+          let newImageUrl = await getDownloadURL(uploadTask.snapshot.ref);
+          updatedData.imageUrl = newImageUrl; // ✅ Save new image URL
+
+          // ✅ Now update Firestore after image is uploaded
+          await updateDoc(doc(db, "posts", postId), updatedData);
+
+          showModal("Post updated successfully!");
+          closeEditModal();
+        }
+      );
+    } else {
+      // ✅ If no new image, update Firestore directly
+      await updateDoc(doc(db, "posts", postId), updatedData);
+      showModal("Post updated successfully!");
+      closeEditModal();
+    }
   } catch (error) {
     console.error("Error updating post:", error);
   } finally {
-    hideLoadingSpinner();
+    setTimeout(() => {
+      hideLoadingSpinner();
+    }, 2000);
+    // Ensure loading stops even on error
   }
 };
 
@@ -288,12 +403,12 @@ document
 
 // for showing all of my post here is the functuons for that ends above -------------------------
 
-//now this is for the getiing all the post fucantion below
-//  Listen for Real-Time Updates
+// Listen for Real-Time Updates (All Posts)
 onSnapshot(collection(db, "posts"), (snapshot) => {
   savedPosts = snapshot.docs.map((doc) => ({
     postUID: doc.id,
     ...doc.data(),
+    imageUrl: doc.data().imageUrl || null, // Include image URL (null if no image)
   }));
   console.log("Cached Posts Updated:", savedPosts);
   displayPosts();
@@ -363,8 +478,16 @@ const displayPosts = () => {
               } ${post.updatedTime ? "(Updated)" : ""}
             </h6>
           </div>
-          <h1>${index + 1}: ${post.postHeading}</h1>
+          <h1>${post.postHeading}</h1>
           <h3>${post.postText}</h3>
+
+          <!-- ✅ Display Image Below Post Text (Only if Available) -->
+          ${
+            post.imageUrl
+              ? `<img src="${post.imageUrl}" alt="Post Image" class="postImage">`
+              : ""
+          }
+
           <div class="likeButton-And-Likes">
             <button class="like-btn" data-postid="${
               post.postUID
@@ -391,15 +514,14 @@ const displayPosts = () => {
     );
   });
 
+  // ✅ Attach event listeners correctly
   document.querySelectorAll(".addFreind").forEach((button) => {
     button.addEventListener("click", function () {
-      // Get the recipient's UID from the data attribute
       const recipientUID = this.dataset.userid;
       sendFriendRequest(recipientUID);
     });
   });
 
-  // ✅ Attach event listeners correctly
   document.querySelectorAll(".like-btn").forEach((button) => {
     button.addEventListener("click", function () {
       const postUID = this.dataset.postid;

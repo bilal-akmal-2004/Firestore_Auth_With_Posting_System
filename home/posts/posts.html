@@ -21,6 +21,40 @@
 
   <link rel="stylesheet" href="posts.css" />
   <body>
+    <!-- my gihtub area lef side  -->
+    <div class="myGithubDiv">
+      <div style="width: 80%; border-radius: 10px">
+        <a
+          href="https://github.com/bilal-akmal-2004?tab=repositories"
+          target="_blank"
+          ><img
+            src="../../pics/gitHub.png"
+            alt="Github Png"
+            class="img-fluid border border-3 rounded-3"
+        /></a>
+      </div>
+
+      <a
+        href="https://github.com/bilal-akmal-2004?tab=repositories"
+        target="_blank"
+        ><button>Check my gitHub</button></a
+      >
+    </div>
+    <!-- my portfoloi area right side side  -->
+    <div class="myPortfolioDiv">
+      <div style="width: 80%; border-radius: 10px">
+        <a href="https://bilal-akmal-2004.github.io/Portfolio_/" target="_blank"
+          ><img
+            src="../../pics/cvPic.png"
+            alt="Github Png"
+            class="img-fluid border border-3 border-dark rounded-3"
+        /></a>
+      </div>
+
+      <a href="https://bilal-akmal-2004.github.io/Portfolio_/" target="_blank"
+        ><button>Check my Portfolio</button></a
+      >
+    </div>
     <div id="background"></div>
     <!-- navbar  -->
     <div class="navbarMain">
@@ -60,27 +94,28 @@
       <!-- form for creating a new usere below  -->
       <form id="mainFormCreateUser">
         <div class="mb-3">
-          <label for="exampleInputEmail1" class="form-label"
-            >Post heading</label
-          >
-          <input
-            type="email"
-            class="form-control"
-            id="postHeading"
-            aria-describedby="emailHelp"
-          />
+          <label for="postHeading" class="form-label">Post heading</label>
+          <input type="text" class="form-control" id="postHeading" />
           <h5>Write a small heading for your post.</h5>
         </div>
         <div class="mb-3">
-          <label for="exampleInputPassword1" class="form-label"
-            >Post text</label
-          >
+          <label for="postText" class="form-label">Post text</label>
           <input type="text" class="form-control" id="postText" />
+        </div>
+        <div class="mb-3">
+          <label for="postImage" class="form-label">Upload Image</label>
+          <input
+            type="file"
+            class="form-control"
+            id="postImage"
+            accept="image/*"
+          />
         </div>
         <button type="button" class="btn btn-primary" id="createNewPostButton">
           Create !
         </button>
       </form>
+
       <!-- here is the div for my posts below -->
       <div id="myPostsDiv">hi</div>
       <!-- here is the div for all of the posts below -->
@@ -103,7 +138,6 @@
         </button>
       </div>
     </div>
-
     <!-- Edit Post Modal -->
     <div id="editModal" class="modal">
       <div class="modal-content">
@@ -120,6 +154,30 @@
           class="form-control"
           placeholder="Edit Text"
         />
+
+        <!-- Show Existing Image -->
+        <img
+          id="editImagePreview"
+          src=""
+          alt="Post Image"
+          style="
+            max-width: 100%;
+            height: auto;
+            display: none;
+            margin-top: 10px;
+            border-radius: 10px;
+          "
+        />
+
+        <!-- Upload New Image -->
+        <input
+          type="file"
+          id="editPostImage"
+          accept="image/*"
+          class="form-control"
+          style="margin-top: 10px"
+        />
+
         <button class="btn btn-primary" id="updatePostButton">Update</button>
         <button class="btn btn-secondary" onclick="closeEditModal()">
           Cancel

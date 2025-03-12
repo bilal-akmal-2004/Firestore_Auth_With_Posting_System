@@ -1,10 +1,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Baloo+Bhaina+2:wght@400..800&family=Itim&family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Overpass:ital,wght@0,100..900;1,100..900&family=Poppins&family=Source+Code+Pro:ital,wght@0,200..900;1,200..900&family=Ysabeau+SC:wght@1..1000&display=swap');
+
 /* General Styles */
 body {
   margin: 0;
   padding: 0;
   background: linear-gradient(180deg, #1a3039, #213e49, #173b48, #083a4d);
-  font-family: "Baloo Bhaina 2", sans-serif;
+  font-family: "Poppins", sans-serif;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -44,10 +45,6 @@ body {
   gap: 10px;
 }
 
-/* Each nav item takes equal space */
-.navbarMain li {
-  flex: 1;
-}
 
 /* Navbar Buttons */
 .navbarButtons {
@@ -60,12 +57,16 @@ body {
   border-radius: 10px;
   color: white;
   font-weight: bold;
-  transition: background 0.3s;
+}
+
+.navbarButtons {
+  transition: all 1s ease-in-out; /* Ensures transition applies both ways */
 }
 
 .navbarButtons:hover {
-  transition: all 0.5s ease-in-out;
-  background: #058879;
+  /* Any changes you want */
+  background-color: #058879;
+  transform: scale(1.03);
 }
 
 /* Hide the toggle checkbox */
@@ -283,6 +284,8 @@ button:hover {
 }
 /* Post Container */
 .postDiv {
+  display: flex;
+  flex-direction: column;
   background: rgba(255, 255, 255, 0.15);
   border-radius: 10px;
   padding: 20px;
@@ -525,6 +528,7 @@ button:hover {
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 9999; /* Ensures spinner appears on top */
 }
 
 .spinner {
@@ -535,6 +539,12 @@ button:hover {
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
+
+/* Ensure modal has a lower z-index */
+#editModal {
+  z-index: 1000; /* Lower than spinner */
+}
+
 
 /* all post heading css  */
 .allPostHeading{
@@ -553,8 +563,186 @@ button:hover {
   }
 }
 
+/* css my github div on the left myGithubDiv */
+.myGithubDiv{
+  display: flex;
+        justify-content: center;
+        flex-direction: column;
+        align-items: center;
+        width: 370px;
+        height: 370px;
+        gap: 10px;
+        border-radius: 10px;
+        background-color: rgba(255, 255, 255, 0.15);
+        position: fixed;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+        left: 100px;
+        top: 301px;
+}
+
+.myGithubDiv:hover {
+  transform: scale(1.02);
+}
+.myGithubDiv a{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  text-decoration: none;
+  color: white;
+}
+.myGithubDiv button{
+  display: block;
+  width: 85%;
+  text-align: center;
+  background-color: #2a9d8f;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+}
+.myGithubDiv button:hover{
+  background-color: #058879;
+}
+
+/* my portfolio div on right side  */
+.myPortfolioDiv{
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  width: 370px;
+  height: 370px;
+  gap: 10px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.15);
+  position: fixed;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+  right: 100px;
+  top: 301px;
+}
+
+.myPortfolioDiv:hover {
+  transform: scale(1.02);
+}
+.myPortfolioDiv a{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  text-decoration: none;
+  color: white;
+}
+.myPortfolioDiv button{
+  display: block;
+  width: 85%;
+  text-align: center;
+  background-color: #2a9d8f;
+  border: none;
+  padding: 10px;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+}
+.myPortfolioDiv button:hover{
+  background-color: #058879;
+}
+
+
+/* css for psot image  */
+.postImage {
+  max-width: 100%;
+   height: auto; 
+   margin-top: 10px; 
+   border-radius: 10px;
+}
+
+
 
 /* Responsive Adjustments */
+/* Responsive Design */
+@media (max-width: 1609px) {
+  .myPortfolioDiv{ 
+    right: 65px;
+  }
+  .myGithubDiv{
+    left: 65px;
+  }
+}
+@media (max-width: 1509px) {
+  .myPortfolioDiv{ 
+    width: 310px;
+    height: 330px;
+  }
+  .myGithubDiv{
+    width: 310px;
+    height: 330px;
+  }
+}
+@media (max-width: 1383px) {
+  .myPortfolioDiv{ 
+    right: 35px;
+    width: 270px;
+    height: 310px;
+  }
+  .myGithubDiv{
+    left: 35px;
+    width: 270px;
+    height: 310px;
+  }
+}
+@media (max-width: 1235px) {
+  .myPortfolioDiv{ 
+    right: 15px;
+    width: 220px;
+    height: 280px;
+  }
+  .myGithubDiv{
+    left: 15px;
+    width: 220px;
+    height: 280px;
+  }
+}
+@media (max-width: 1090px) {
+  .myPortfolioDiv{ 
+    right: 8px;
+    width: 180px;
+    height: 220px;
+  }
+  .myGithubDiv{
+    left: 8px;
+    width: 180px;
+    height: 220px;
+  }
+  .myPortfolioDiv button {
+    width: 80%;
+    font-size: 12px;
+  }
+  .myGithubDiv button {
+    width: 80%;
+    font-size: 12px;
+  }
+}
+@media (max-width: 984px) {
+  .myPortfolioDiv{ 
+    display: none;
+  }
+  .myGithubDiv{
+    display: none;
+  }
+}
+@media (max-width: 768px) {
+  .postDiv, #mainFormCreateUser {
+    width: 95%;
+  }
+}
+@media (max-width: 633px) {
+  .postDiv{
+  min-width: 500px;
+  max-width: 500px;
+  }
+}
 @media (max-width: 600px) {
   .postDiv {
     width: 95%;
@@ -590,18 +778,8 @@ button:hover {
   }
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .postDiv, #mainFormCreateUser {
-    width: 95%;
-  }
-}
-@media (max-width: 633px) {
-  .postDiv{
-  min-width: 500px;
-  max-width: 500px;
-  }
-}
+
+
 @media (max-width: 528px) {
   .postDiv{
   min-width: 400px;
