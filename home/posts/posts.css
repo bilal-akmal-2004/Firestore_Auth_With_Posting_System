@@ -56,7 +56,7 @@ body {
   padding: 10px;
   border-radius: 10px;
   color: white;
-  font-weight: bold;
+  font-weight: 100;
 }
 
 .navbarButtons {
@@ -600,7 +600,7 @@ button:hover {
   padding: 10px;
   border-radius: 10px;
   color: white;
-  font-weight: bold;
+  font-weight: 100;
 }
 .myGithubDiv button:hover{
   background-color: #058879;
@@ -643,7 +643,7 @@ button:hover {
   padding: 10px;
   border-radius: 10px;
   color: white;
-  font-weight: bold;
+  font-weight: 100;
 }
 .myPortfolioDiv button:hover{
   background-color: #058879;
