@@ -138,6 +138,13 @@ newPostButton.addEventListener("click", () => {
   myPostsDiv.style.display = "none";
   allPostsDiv.style.display = "none";
   mainFormCreateUser.style.display = "block";
+  // ✅ Animate form when it appears
+  gsap.from("#mainFormCreateUser", {
+    opacity: 0,
+    scale: 0.4, // Start slightly smaller
+    duration: 0.8,
+    ease: "power2.out",
+  });
 });
 
 let createNewPost = async () => {
@@ -194,7 +201,6 @@ createNewPostButton.addEventListener("click", createNewPost);
 // for creating new post and other stuff ends above-----------------------------------------
 
 // for showing all of my post here is the functuons for that
-
 //  Show My Posts
 //
 let mySavedPosts = [];
@@ -223,9 +229,10 @@ onSnapshot(q, (querySnapshot) => {
 });
 
 // Function to display My Posts from cache
+// ✅ Function to display My Posts from cache with GSAP Animation
 let showMyPosts = () => {
   try {
-    myPostsDiv.innerHTML = `<h1 style="padding: 10px; font-size: 25px;text-align: center;">My Posts</h1>`;
+    myPostsDiv.innerHTML = `<h1 style="padding: 10px; font-size: 25px; text-align: center;">My Posts</h1>`;
 
     mySavedPosts.forEach((post) => {
       myPostsDiv.innerHTML += `
@@ -241,22 +248,37 @@ let showMyPosts = () => {
         post.updatedTime ? "(Updated)" : ""
       }</h6>
       
-<div>
-<button class="btn btn-danger delete-btn w-25" data-id="${
-        post.postId
-      }">Delete</button>
-          <button class="btn btn-warning edit-btn w-25" data-id="${
-            post.postId
-          }" data-heading="${post.postHeading}" data-text="${
-        post.postText
-      }" data-image="${post.imageUrl || ""}">Edit</button>
-      </div>
-          
+          <div>
+            <button class="btn btn-danger delete-btn w-25" data-id="${
+              post.postId
+            }">Delete</button>
+            <button class="btn btn-warning edit-btn w-25" data-id="${
+              post.postId
+            }" 
+              data-heading="${post.postHeading}" 
+              data-text="${post.postText}" 
+              data-image="${post.imageUrl || ""}">Edit</button>
+          </div>
         </div>
       `;
     });
 
-    // Attach event listeners to Delete and Edit buttons
+    // ✅ GSAP Animation: Smooth fade-in with slight scaling
+    gsap.from(".postDiv", {
+      opacity: 0,
+      scale: 0.5, // Slightly smaller on load
+      duration: 0.8,
+      ease: "power2.in",
+    });
+    gsap.from(".postDiv img", {
+      opacity: 0,
+      scale: 0.5, // Slightly smaller on load
+      delay: 0.8,
+      duration: 0.8,
+      ease: "power2.in",
+    });
+
+    // ✅ Attach event listeners to Delete and Edit buttons
     document.querySelectorAll(".delete-btn").forEach((button) => {
       button.addEventListener("click", async (event) => {
         let postId = event.target.getAttribute("data-id");
@@ -466,7 +488,7 @@ const displayPosts = () => {
     allPostsDiv.insertAdjacentHTML(
       "beforeend",
       `<div style="display: flex; justify-content: center;">
-        <div class="postDiv">
+        <div class="postDiv" style="opacity: 0; transform: translateX(-50px);">
           <div class="nameAndTime">
             <h6><i class="fa-regular fa-user"></i> ${post.name}</h6>
             <h6>
@@ -514,7 +536,7 @@ const displayPosts = () => {
     );
   });
 
-  // ✅ Attach event listeners correctly
+  // ✅ Attach event listeners
   document.querySelectorAll(".addFreind").forEach((button) => {
     button.addEventListener("click", function () {
       const recipientUID = this.dataset.userid;
@@ -548,6 +570,29 @@ const displayPosts = () => {
       const postUID = this.dataset.postid;
       openViewCommentsModal(postUID);
     });
+  });
+
+  // ✅ GSAP Animation for Slide-In from Left on Scroll
+  gsap.utils.toArray(".postDiv").forEach((post, index) => {
+    gsap.to(post, {
+      scrollTrigger: {
+        trigger: post,
+        start: "top 85%", // Animation starts when 85% of post enters viewport
+        toggleActions: "play none none none", // Runs once
+      },
+      x: 0, // Move back to normal position
+      opacity: 1,
+      duration: 0.8,
+      delay: index * 0.1, // Creates a wave effect
+      ease: "power2.out",
+    });
+  });
+  gsap.from(".postDiv img", {
+    y: -220,
+    opacity: 0,
+    duration: 0.6,
+    delay: 1.1,
+    ease: "back.out(4)",
   });
 };
 
@@ -787,7 +832,6 @@ allPostButton.addEventListener("click", () => {
 const showFriendRequests = async () => {
   try {
     showLoadingSpinner();
-    // Get current user's document from the "Users" collection (ensure collection name matches your structure)
     const userDocRef = doc(db, "Users", userData.id);
     const userDocSnap = await getDoc(userDocRef);
 
@@ -798,7 +842,6 @@ const showFriendRequests = async () => {
       if (friendRequests.length === 0) {
         showModal("No requests available");
       } else {
-        // For each UID in friendRequests, fetch the user's name
         const friendRequestsInfo = await Promise.all(
           friendRequests.map(async (friendUID) => {
             const friendDocSnap = await getDoc(doc(db, "Users", friendUID));
@@ -814,7 +857,6 @@ const showFriendRequests = async () => {
           })
         );
 
-        // Build HTML list with an Accept button for each friend request
         let requestsHtml = "<ul>";
         friendRequestsInfo.forEach((info) => {
           requestsHtml += `<li>
@@ -824,11 +866,11 @@ const showFriendRequests = async () => {
         });
         requestsHtml += "</ul>";
 
-        // Create and show the modal dynamically
+        // ✅ Create modal dynamically
         let modal = document.createElement("dialog");
         modal.setAttribute("id", "friendRequestsModal");
         modal.innerHTML = `
-          <div class="friendRequestModal"">
+          <div class="friendRequestModal">
             <h2>Friend Requests</h2>
             <h5>${requestsHtml}</h5>
             <button id="closeFriendRequestsModal" class="btn btn-primary">Close</button>
@@ -837,22 +879,44 @@ const showFriendRequests = async () => {
         document.body.appendChild(modal);
         modal.showModal();
 
-        // Attach event listeners for Accept buttons
+        // ✅ Animate modal appearance with GSAP
+        gsap.from(".friendRequestModal", {
+          y: -50,
+          opacity: 0,
+          duration: 0.5,
+          ease: "power2.out",
+        });
+
+        // ✅ Accept friend request animation
         document.querySelectorAll(".accept-btn").forEach((button) => {
           button.addEventListener("click", async function () {
             const friendUID = this.dataset.uid;
             await acceptFriendRequest(friendUID);
-            // Optionally, remove this request from the modal UI
-            this.parentElement.remove();
+
+            // Animate removal of request
+            gsap.to(this.parentElement, {
+              opacity: 0,
+              height: 0,
+              duration: 0.4,
+              onComplete: () => this.parentElement.remove(),
+            });
           });
         });
 
-        // Attach event listener for closing the modal
+        // ✅ Close button with animation
         document
           .getElementById("closeFriendRequestsModal")
           .addEventListener("click", () => {
-            modal.close();
-            modal.remove();
+            gsap.to(".friendRequestModal", {
+              y: -50,
+              opacity: 0,
+              duration: 0.6,
+              ease: "power2.in",
+              onComplete: () => {
+                modal.close();
+                modal.remove();
+              },
+            });
           });
       }
     } else {
@@ -1098,3 +1162,39 @@ document.addEventListener("DOMContentLoaded", function () {
 
 allPostsDiv.style.display = "flex";
 getAllPosts();
+
+// here are GSAP area for css
+
+let tl = gsap.timeline();
+// navbar buttons css
+gsap.from(".ulForNavbar li", {
+  y: -30,
+  opacity: 0,
+  duration: 0.5,
+  delay: 0.5,
+  stagger: 0.3,
+});
+// check  my github div here
+gsap.from(".myGithubDiv", {
+  height: "1%",
+  opacity: 0,
+  duration: 1,
+  delay: 1,
+  ease: "bounce.out",
+});
+// check  my postfoloi div here
+gsap.from(".myPortfolioDiv", {
+  height: "1%",
+  opacity: 0,
+  duration: 1,
+  delay: 1,
+  ease: "bounce.out",
+});
+// now css for the main post div here lesgoo
+gsap.from(".myPortfolioDiv img, .myGithubDiv img", {
+  y: -220,
+  opacity: 0,
+  duration: 1.8,
+  delay: 1.1,
+});
+// --------------------------------------
